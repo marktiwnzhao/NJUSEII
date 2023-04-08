@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mikumifa.wms.dao.mapper.TicketInfoMapper">
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        DELETE
+        FROM ticket_info
+        WHERE ticket_id = #{ticketId}
+    </delete>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="ticketId"
+            parameterType="com.mikumifa.wms.entity.dto.TicketInfo">
+        INSERT INTO ticket_info(route_id, price, seat_class, seat_no)
+        VALUES (#{routeId}, #{price}, #{seatClass}, #{seatNo})
+    </insert>
+    <insert id="insertSelective" useGeneratedKeys="true" keyProperty="ticketId"
+            parameterType="com.mikumifa.wms.entity.dto.TicketInfo">
+        INSERT INTO ticket_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="routeId != null">route_id,</if>
+            <if test="price != null">price,</if>
+            <if test="seatClass != null">seat_class,</if>
+            <if test="seatNo != null">seat_no,</if>
+            <if test="selled != null">selled,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="routeId != null">#{routeId},</if>
+            <if test="price != null">#{price},</if>
+            <if test="seatClass != null">#{seatClass},</if>
+            <if test="seatNo != null">#{seatNo},</if>
+            <if test="selled != null">#{seatNo},</if>
+        </trim>
+    </insert>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer"
+            resultType="com.mikumifa.wms.entity.dto.TicketInfo">
+        SELECT ticket_id, route_id, price, seat_class, seat_no, selled
+        FROM ticket_info
+        WHERE ticket_id = #{ticketId}
+    </select>
+
+    <update id="updateByPrimaryKey" parameterType="com.mikumifa.wms.entity.dto.TicketInfo">
+        UPDATE
+            ticket_info
+        SET route_id   = #{routeId},
+            price      = #{price},
+            seat_class = #{seatClass},
+            seat_no    = #{seatNo},
+            selled=#{selled}
+        WHERE ticket_id = #{ticketId}
+    </update>
+    <select id="selectByInfo" resultType="com.mikumifa.wms.entity.dto.TicketInfo">
+        SELECT
+        ti.ticket_id, ti.route_id, ti.price, ti.seat_class, ti.seat_no,ti.selled
+        FROM
+        ticket_info ti
+        JOIN railway_info ri ON ti.route_id = ri.route_id
+        JOIN order_info oi ON ti.ticket_id = oi.ticket_id
+        <where>
+            <if test=" origin != null ">
+                and ri.origin = #{origin}
+            </if>
+            <if test="destination != null">
+                and ri.destination = #{destination}
+            </if>
+            <if test="departureTime != null">
+                and ri.departure_time > #{departureTime}
+            </if>
+            <if test="selled != null">
+                and ti.selled =#{selled}
+            </if>
+        </where>
+    </select>
+
+</mapper>

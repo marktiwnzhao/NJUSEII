@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mikumifa.wms.dao.mapper.CustomerMapper">
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        DELETE FROM customer WHERE customer_id = #{id}
+    </delete>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="customerId" parameterType="com.mikumifa.wms.entity.dto.Customer">
+        INSERT INTO customer(name, email, id_card_info, credit_score, password)
+        VALUES (#{name}, #{email}, #{idCardInfo}, #{creditScore}, #{password})
+    </insert>
+    <insert id="insertSelective"  useGeneratedKeys="true" keyProperty="customerId" parameterType="com.mikumifa.wms.entity.dto.Customer">
+        INSERT INTO customer
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="email != null">email,</if>
+            <if test="idCardInfo != null">id_card_info,</if>
+            <if test="creditScore != null">credit_score,</if>
+            <if test="password != null">password,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="email != null">#{email},</if>
+            <if test="idCardInfo != null">#{idCardInfo},</if>
+            <if test="creditScore != null">#{creditScore},</if>
+            <if test="password != null">#{password},</if>
+        </trim>
+    </insert>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultType="com.mikumifa.wms.entity.dto.Customer">
+        SELECT customer_id, name, email, id_card_info, credit_score, password
+        FROM customer WHERE customer_id = #{id}
+    </select>
+    <update id="updateByPrimaryKeySelective" parameterType="com.mikumifa.wms.entity.dto.Customer">
+        UPDATE customer
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="idCardInfo != null">id_card_info = #{idCardInfo},</if>
+            <if test="creditScore != null">credit_score = #{creditScore},</if>
+            <if test="password != null">password = #{password},</if>
+        </set>
+        WHERE customer_id = #{customerId}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.mikumifa.wms.entity.dto.Customer">
+        UPDATE customer SET
+                            name = #{name},
+                            email = #{email},
+                            id_card_info = #{idCardInfo},
+                            credit_score = #{creditScore},
+                            password = #{password}
+        WHERE customer_id = #{customerId}
+    </update>
+    <select id="verifyPassword" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM customer
+        WHERE email = #{email} AND password = #{password}
+    </select>
+</mapper>

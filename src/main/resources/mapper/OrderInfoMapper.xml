@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mikumifa.wms.dao.mapper.OrderInfoMapper">
+    <!-- 根据主键id删除订单信息 -->
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete
+        from order_info
+        where order_id = #{orderId}
+    </delete>
+
+    <!-- 插入订单信息，所有字段都插入 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="orderId"
+            parameterType="com.mikumifa.wms.entity.dto.OrderInfo">
+        insert into order_info (customer_id, ticket_id, order_status)
+        values (#{customerId}, #{ticketId}, #{orderStatus})
+    </insert>
+
+    <!-- 插入订单信息，只插入非空字段 -->
+    <insert id="insertSelective" useGeneratedKeys="true" keyProperty="orderId"
+            parameterType="com.mikumifa.wms.entity.dto.OrderInfo">
+        insert into order_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="customerId != null">
+                customer_id,
+            </if>
+            <if test="ticketId != null">
+                ticket_id,
+            </if>
+            <if test="orderStatus != null">
+                order_status,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="customerId != null">
+                #{customerId},
+            </if>
+            <if test="ticketId != null">
+                #{ticketId},
+            </if>
+            <if test="orderStatus != null">
+                #{orderStatus},
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 根据主键id查询订单信息 -->
+    <select id="selectByPrimaryKey" resultType="com.mikumifa.wms.entity.dto.OrderInfo"
+            parameterType="java.lang.Integer">
+        select *
+        from order_info
+        where order_id = #{orderId}
+    </select>
+    <select id="selectBySelective" resultType="com.mikumifa.wms.entity.dto.OrderInfo"
+            parameterType="java.lang.Integer">
+        select orderId,customerId,ticketId,orderStatus
+        from order_info
+        <where>
+            <if test="customerId != null">
+                customer_id = #{customerId},
+            </if>
+            <if test="ticketId != null">
+                ticket_id = #{ticketId},
+            </if>
+            <if test="orderStatus != null">
+                order_status = #{orderStatus},
+            </if>
+
+        </where>
+    </select>
+
+    <!-- 根据主键id更新订单信息，只更新非空字段 -->
+    <update id="updateByPrimaryKeySelective" parameterType="com.mikumifa.wms.entity.dto.OrderInfo">
+        update order_info
+        <set>
+            <if test="customerId != null">
+                customer_id = #{customerId},
+            </if>
+            <if test="ticketId != null">
+                ticket_id = #{ticketId},
+            </if>
+            <if test="orderStatus != null">
+                order_status = #{orderStatus},
+            </if>
+        </set>
+        where order_id = #{orderId}
+    </update>
+
+    <!-- 根据主键id更新订单信息，所有字段都更新 -->
+    <update id="updateByPrimaryKey" parameterType="com.mikumifa.wms.entity.dto.OrderInfo">
+        update order_info
+        set customer_id  = #{customerId},
+            ticket_id    = #{ticketId},
+            order_status = #{orderStatus}
+        where order_id = #{orderId}
+    </update>
+</mapper>

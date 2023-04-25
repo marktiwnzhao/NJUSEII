@@ -7,6 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="back-end" />
+        <module name="demo" />
         <module name="se2-work" />
       </profile>
     </annotationProcessing>
@@ -14,6 +15,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="back-end" options="-parameters" />
+      <module name="demo" options="-parameters" />
       <module name="se2-work" options="-parameters" />
     </option>
   </component>

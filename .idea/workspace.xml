@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="da97200b-ef87-4ce4-baf1-b7153fe1cf8b" name="变更" comment="">
-      <change beforePath="$PROJECT_DIR$/back-end/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/.idea/encodings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/需求分析/用例文档.md" beforeDir="false" afterPath="$PROJECT_DIR$/需求分析/用例文档.md" afterDir="false" />
-    </list>
+    <list default="true" id="da97200b-ef87-4ce4-baf1-b7153fe1cf8b" name="变更" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -38,6 +33,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
+    "nodejs_package_manager_path": "npm",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -59,6 +55,7 @@
       <option name="presentableId" value="Default" />
       <updated>1681784388895</updated>
       <workItem from="1681784392990" duration="55000" />
+      <workItem from="1682237058495" duration="59000" />
     </task>
     <servers />
   </component>

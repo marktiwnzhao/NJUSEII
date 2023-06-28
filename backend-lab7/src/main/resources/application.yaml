@@ -1,0 +1,28 @@
+
+
+spring:
+  jackson:
+    serialization:
+      write-dates-as-timestamps: true
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://124.220.80.204:5432/123o62?user=postgres&password=041015
+
+  jpa:
+    show-sql: true
+    database: postgresql
+    hibernate:
+      ddl-auto: update
+
+sa-token:
+#   token-name: token
+#   # 30 days
+#   timeout: 2592000
+#   # no expiration
+#   activity-timeout: -1
+#   # multi login
+#   is-concurrent: true
+#   is-share: true
+  token-style: uuid
+  is-log: true

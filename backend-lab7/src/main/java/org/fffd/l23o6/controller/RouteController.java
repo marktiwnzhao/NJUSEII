@@ -38,4 +38,9 @@ public class RouteController {
         routeService.editRoute(routeId, request.getName(), request.getStationIds());
         return CommonResponse.success();
     }
+    @DeleteMapping("admin/route/{routeId}")
+    public CommonResponse<?> delRoute(@PathVariable("routeId") Long routeId) {
+        routeService.delRoute(routeId);
+        return CommonResponse.success();
+    }
 }

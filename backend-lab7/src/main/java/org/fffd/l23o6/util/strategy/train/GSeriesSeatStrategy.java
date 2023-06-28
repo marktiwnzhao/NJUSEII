@@ -10,7 +10,6 @@ import jakarta.annotation.Nullable;
 
 public class GSeriesSeatStrategy extends TrainSeatStrategy {
     public static final GSeriesSeatStrategy INSTANCE = new GSeriesSeatStrategy();
-     
     private final Map<Integer, String> BUSINESS_SEAT_MAP = new HashMap<>();
     private final Map<Integer, String> FIRST_CLASS_SEAT_MAP = new HashMap<>();
     private final Map<Integer, String> SECOND_CLASS_SEAT_MAP = new HashMap<>();
@@ -20,8 +19,14 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
         put(GSeriesSeatType.FIRST_CLASS_SEAT, FIRST_CLASS_SEAT_MAP);
         put(GSeriesSeatType.SECOND_CLASS_SEAT, SECOND_CLASS_SEAT_MAP);
     }};
-
-
+    private final Map<GSeriesSeatType,Double> MONEY_PER_STARTION_MAP = new HashMap<>() {{
+        put(GSeriesSeatType.BUSINESS_SEAT,60.0 );
+        put(GSeriesSeatType.FIRST_CLASS_SEAT, 40.0);
+        put(GSeriesSeatType.SECOND_CLASS_SEAT, 20.0);
+    }};
+    public Double price(GSeriesSeatStrategy.GSeriesSeatType type, int len){
+        return MONEY_PER_STARTION_MAP.get(type)*len;
+    }
     private GSeriesSeatStrategy() {
 
         int counter = 0;
@@ -61,15 +66,71 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
 
 
     public @Nullable String allocSeat(int startStationIndex, int endStationIndex, GSeriesSeatType type, boolean[][] seatMap) {
-        //endStationIndex - 1 = upper bound
-        // TODO
+        // Get the seat type map.
+        Map<Integer, String> seatTypeMap = TYPE_MAP.get(type);
+
+        // Calculate offset for the seat type.
+        int offset = 0;
+        for (GSeriesSeatType seatType : TYPE_MAP.keySet()) {
+            if (seatType.equals(type)) {
+                break;
+            }
+            offset += TYPE_MAP.get(seatType).size();
+        }
+
+        // Loop through all the seats of the desired type.
+        for (int i = 0; i < seatTypeMap.size(); i++) {
+            boolean isAvailable = true;
+            // Check if the seat is available for all the stations between start and end.
+            for (int station = startStationIndex; station < endStationIndex-1; station++) {
+                if (seatMap[station][offset + i]) {
+                    isAvailable = false;
+                    break;
+                }
+            }
+
+            // If seat is available, mark it as occupied and return seat name.
+            if (isAvailable) {
+                for (int station = startStationIndex; station < endStationIndex-1; station++) {
+                    seatMap[station][offset + i] = true;
+                }
+                return seatTypeMap.get(i);
+            }
+        }
+
+        // If no seat is available, return null.
         return null;
     }
 
     public Map<GSeriesSeatType, Integer> getLeftSeatCount(int startStationIndex, int endStationIndex, boolean[][] seatMap) {
-        // TODO
-        return null;
+        Map<GSeriesSeatType, Integer> leftSeatCount = new HashMap<>();
+
+        // Calculate the left seats for each seat type.
+        int offset = 0;
+        for (GSeriesSeatType type : GSeriesSeatType.values()) {
+            Map<Integer, String> seatTypeMap = TYPE_MAP.get(type);
+            if(seatTypeMap==null)
+                break;
+            int count = 0;
+            for (int i = 0; i < seatTypeMap.size(); i++) {
+                boolean isAvailable = true;
+                for (int station = startStationIndex; station < endStationIndex-1; station++) {
+                    if (seatMap[station][offset + i]) {
+                        isAvailable = false;
+                        break;
+                    }
+                }
+                if (isAvailable) {
+                    count++;
+                }
+            }
+            leftSeatCount.put(type, count);
+            offset += seatTypeMap.size();
+        }
+
+        return leftSeatCount;
     }
+
 
     public boolean[][] initSeatMap(int stationCount) {
         return new boolean[stationCount - 1][BUSINESS_SEAT_MAP.size() + FIRST_CLASS_SEAT_MAP.size() + SECOND_CLASS_SEAT_MAP.size()];

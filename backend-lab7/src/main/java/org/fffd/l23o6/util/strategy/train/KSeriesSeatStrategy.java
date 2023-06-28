@@ -1,9 +1,6 @@
 package org.fffd.l23o6.util.strategy.train;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import jakarta.annotation.Nullable;
 
@@ -23,7 +20,15 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
         put(KSeriesSeatType.HARD_SEAT, HARD_SEAT_MAP);
     }};
 
-
+    private final Map<KSeriesSeatStrategy.KSeriesSeatType,Double> MONEY_PER_STARTION_MAP = new HashMap<>() {{
+        put(KSeriesSeatType.SOFT_SLEEPER_SEAT, 30.0);
+        put(KSeriesSeatType.HARD_SLEEPER_SEAT, 20.0);
+        put(KSeriesSeatType.SOFT_SEAT, 15.0);
+        put(KSeriesSeatType.HARD_SEAT, 10.0);
+    }};
+    public Double price(KSeriesSeatStrategy.KSeriesSeatType type, int len){
+        return MONEY_PER_STARTION_MAP.get(type)*len;
+    }
     private KSeriesSeatStrategy() {
 
         int counter = 0;
@@ -66,13 +71,72 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
 
 
     public @Nullable String allocSeat(int startStationIndex, int endStationIndex, KSeriesSeatType type, boolean[][] seatMap) {
-        //endStationIndex - 1 = upper bound
+        // Get the seat type map.
+        Map<Integer, String> seatTypeMap = TYPE_MAP.get(type);
+
+        // Calculate offset for the seat type.
+        int offset = 0;
+        for (KSeriesSeatType seatType : TYPE_MAP.keySet()) {
+            if (seatType.equals(type)) {
+                break;
+            }
+            offset += TYPE_MAP.get(seatType).size();
+        }
+
+        // Loop through all the seats of the desired type.
+        for (int i = 0; i < seatTypeMap.size(); i++) {
+            boolean isAvailable = true;
+            // Check if the seat is available for all the stations between start and end.
+            for (int station = startStationIndex; station < endStationIndex-1; station++) {
+                if (seatMap[station][offset + i]) {
+                    isAvailable = false;
+                    break;
+                }
+            }
+
+            // If seat is available, mark it as occupied and return seat name.
+            if (isAvailable) {
+                for (int station = startStationIndex; station < endStationIndex-1; station++) {
+                    seatMap[station][offset + i] = true;
+                }
+                return seatTypeMap.get(i);
+            }
+        }
+
+        // If no seat is available, return null.
         return null;
     }
 
     public Map<KSeriesSeatType, Integer> getLeftSeatCount(int startStationIndex, int endStationIndex, boolean[][] seatMap) {
-        return null;
+        Map<KSeriesSeatType, Integer> leftSeatCount = new HashMap<>();
+
+        // Calculate the left seats for each seat type.
+        int offset = 0;
+        for (KSeriesSeatType type : KSeriesSeatType.values()) {
+            Map<Integer, String> seatTypeMap = TYPE_MAP.get(type);
+            if(seatTypeMap==null)
+                break;
+            int count = 0;
+            for (int i = 0; i < seatTypeMap.size(); i++) {
+                boolean isAvailable = true;
+                for (int station = startStationIndex; station < endStationIndex-1; station++) {
+                    if (seatMap[station][offset + i]) {
+                        isAvailable = false;
+                        break;
+                    }
+                }
+                if (isAvailable) {
+                    count++;
+                }
+            }
+            leftSeatCount.put(type, count);
+            offset += seatTypeMap.size();
+        }
+
+        return leftSeatCount;
     }
+
+
 
     public boolean[][] initSeatMap(int stationCount) {
         return new boolean[stationCount - 1][SOFT_SLEEPER_SEAT_MAP.size() + HARD_SLEEPER_SEAT_MAP.size() + SOFT_SEAT_MAP.size() + HARD_SEAT_MAP.size()];

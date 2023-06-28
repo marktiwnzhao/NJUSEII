@@ -9,4 +9,5 @@ public class UserVO {
     private String phone;
     private String idn;
     private String type;
+    private String mileagePoints;
 }

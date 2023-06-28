@@ -7,9 +7,7 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://<你的数据库地址>
-    username: <用户名>
-    password: <密码>
+    url: jdbc:postgresql://124.220.80.204:5432/123o62?user=postgres&password=041015
 
   jpa:
     show-sql: true

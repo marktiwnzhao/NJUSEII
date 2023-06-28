@@ -12,8 +12,10 @@ import org.fffd.l23o6.exception.BizError;
 import org.fffd.l23o6.pojo.entity.OrderEntity;
 import org.fffd.l23o6.pojo.entity.RouteEntity;
 import org.fffd.l23o6.pojo.entity.TrainEntity;
+import org.fffd.l23o6.pojo.enum_.TrainType;
 import org.fffd.l23o6.pojo.vo.order.OrderVO;
 import org.fffd.l23o6.service.OrderService;
+import org.fffd.l23o6.util.strategy.payment.PaymentStrategy;
 import org.fffd.l23o6.util.strategy.train.GSeriesSeatStrategy;
 import org.fffd.l23o6.util.strategy.train.KSeriesSeatStrategy;
 import org.springframework.stereotype.Service;
@@ -28,7 +30,6 @@ public class OrderServiceImpl implements OrderService {
     private final UserDao userDao;
     private final TrainDao trainDao;
     private final RouteDao routeDao;
-
     public Long createOrder(String username, Long trainId, Long fromStationId, Long toStationId, String seatType,
             Long seatNumber) {
         Long userId = userDao.findByUsername(username).getId();
@@ -104,8 +105,23 @@ public class OrderServiceImpl implements OrderService {
 
         // TODO: refund user's money and credits if needed
 
+        double refundAmount = calculateAmount(order);
+        Long userId = order.getUserId();
+//        refundUser(userId, refundAmount);
+
+
         order.setStatus(OrderStatus.CANCELLED);
         orderDao.save(order);
+    }
+
+    private double calculateAmount(OrderEntity order) {
+        TrainEntity trainEntity = trainDao.findById(order.getTrainId()).get();
+        Long mileagePoints = userDao.findById(order.getUserId()).get().getMileagePoints();
+        List<Long> stationIds = routeDao.findById(trainEntity.getRouteId()).get().getStationIds();
+        double basePrice = calculateRawPaymentByStationIds(stationIds, trainEntity.getTrainType());
+        double v = calculatePaymentByPoints(mileagePoints, basePrice);
+        return v;
+
     }
 
     public void payOrder(Long id) {
@@ -116,10 +132,61 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // TODO: use payment strategy to pay!
+//        double amountToPay = calculateAmountToPay(order);
+//        Long userId = order.getUserId();
+//        processPayment(userId, amountToPay);
         // TODO: update user's credits, so that user can get discount next time
+
 
         order.setStatus(OrderStatus.COMPLETED);
         orderDao.save(order);
     }
+    private  final double[][] POINTS_DISCOUNT_TABLE = {
+            {1000, 0.1},
+            {2000, 0.15},
+            {7000, 0.2},
+            {40000, 0.25},
+            {Double.POSITIVE_INFINITY, 0.3} // 用无穷大来表示50000以上的积分
+    };
+    /**
+     * @Description:  通过积分和basePrice来计算价格
+     * @Param: [mileagePoints, basePrice]
+     * @return: double
+     * @Date: 2023/6/28
+     */
+    public double calculatePaymentByPoints(Long mileagePoints, double basePrice) {
+        double discount = 0;
+        long remainingPoints = mileagePoints;
 
+
+
+        for (double[] pointsDiscount : POINTS_DISCOUNT_TABLE) {
+            long pointsRange = (long) pointsDiscount[0];
+            double discountRate = pointsDiscount[1] / 100; // 折扣率，转换为小数
+
+            if (remainingPoints <= pointsRange) {
+                discount += remainingPoints * discountRate;
+                break;
+            } else {
+                discount += pointsRange * discountRate;
+                remainingPoints -= pointsRange;
+            }
+        }
+
+        return basePrice - discount;
+    }
+    /**
+     * @Description: 普通过一个站20块, 高铁过一站40
+     * @Param: [stationIds]
+     * @return: double
+     * @Date: 2023/6/28
+     */
+    public double calculateRawPaymentByStationIds(List<Long> stationIds, TrainType type){
+        if(TrainType.HIGH_SPEED==type){
+            return stationIds.size()*40;
+        } else if(TrainType.NORMAL_SPEED==type){
+            return  stationIds.size()*20;
+        }
+        return 0;
+    }
 }

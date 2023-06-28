@@ -37,6 +37,7 @@ public class UserEntity {
     private String phone;
     private String type;
     private String idn;
+    private Long mileagePoints;
 
     @CreationTimestamp
     private Date createdAt;

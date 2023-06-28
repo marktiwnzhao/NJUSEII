@@ -1,6 +1,7 @@
 package org.fffd.l23o6.pojo.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import org.fffd.l23o6.pojo.enum_.TrainType;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 
 import io.hypersistence.utils.hibernate.type.array.BooleanArrayType;
 
@@ -39,7 +38,8 @@ public class TrainEntity {
 
     @NotNull
     @Type(BooleanArrayType.class)
-    @Column(name = "seats", columnDefinition = "boolean[][]")
+    @Column(name = "seats", columnDefinition = "boolean[][]" )
+    //出发点到结束点的作为的使用情况
     private boolean[][] seats;
 
     @NotNull

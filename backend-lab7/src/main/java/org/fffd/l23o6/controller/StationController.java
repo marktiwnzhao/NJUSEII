@@ -40,7 +40,7 @@ public class StationController {
     }
 
     @DeleteMapping("admin/station/{stationId}")
-    public CommonResponse<?> delStation(@PathVariable("stationId") Long stationId, @Valid @RequestBody AddStationRequest request) {
+    public CommonResponse<?> delStation(@PathVariable("stationId") Long stationId) {
         stationService.delStation(stationId);
         return CommonResponse.success();
     }

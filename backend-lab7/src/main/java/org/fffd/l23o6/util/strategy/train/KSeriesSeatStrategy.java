@@ -87,7 +87,7 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
 
         // Calculate offset for the seat type.
         int offset = 0;
-        for (KSeriesSeatType seatType : TYPE_MAP.keySet()) {
+        for (KSeriesSeatType seatType : KSeriesSeatType.values()) {
             if (seatType.equals(type)) {
                 break;
             }
@@ -117,7 +117,25 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
         // If no seat is available, return null.
         return null;
     }
-
+    public boolean[][] refundSeat(int startStationIndex, int endStationIndex, String seat, boolean[][] seatMap) {
+        int offset = 0;
+        for (var x : KSeriesSeatStrategy.KSeriesSeatType.values()) {
+            Map<Integer, String> t = TYPE_MAP.get(x);
+            if(t==null)
+                break;
+            for(var m:t.entrySet()){
+                if(seat.equals(m.getValue())){
+                    Integer key = m.getKey();
+                    for (int station = startStationIndex; station < endStationIndex; station++) {
+                        seatMap[station][offset+key]=false;
+                    }
+                    return seatMap;
+                }
+            }
+            offset+=t.size();
+        }
+        return seatMap;
+    }
     public Map<KSeriesSeatType, Integer> getLeftSeatCount(int startStationIndex, int endStationIndex, boolean[][] seatMap) {
         Map<KSeriesSeatType, Integer> leftSeatCount = new HashMap<>();
 

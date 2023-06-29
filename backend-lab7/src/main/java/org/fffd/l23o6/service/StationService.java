@@ -9,4 +9,6 @@ public interface StationService {
     public List<StationVO> listStations();
     public void addStation(String name);
     public void editStation(Long stationId, String name);
+
+    public  void delStation(Long stationId);
 }

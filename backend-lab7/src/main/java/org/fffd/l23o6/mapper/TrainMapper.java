@@ -45,8 +45,8 @@ public interface TrainMapper  {
         //开始站的出发时间
         trainVO.setDepartureTime(trainEntity.getDepartureTimes().get(start));
         trainVO.setTrainType(trainEntity.getTrainType().getText());
-        trainVO.setStartStationId(startStationId);
 
+        trainVO.setStartStationId(startStationId);
         trainVO.setEndStationId(endStationId);
         //下面要得到每个作为有多少的人,
         List<TicketInfo> tickets =new ArrayList<>();

@@ -121,13 +121,28 @@ public class OrderServiceImpl implements OrderService {
 
         if (order.getStatus() == OrderStatus.PAID) {
             TrainEntity trainEntity = trainDao.findById(order.getTrainId()).get();
+            TrainType trainType = trainEntity.getTrainType();
             UserEntity userEntity = userDao.findById(order.getUserId()).get();
             Double basePrice = calculateRawPaymentByTrainInfo(trainEntity, order.getDepartureStationId(), order.getArrivalStationId(), order.getSeat());
+            RouteEntity routeEntity = routeDao.findById(trainEntity.getRouteId()).get();
+            List<Long> stationIds = routeEntity.getStationIds();
+            int start = stationIds.indexOf(order.getDepartureStationId());
+            int end = stationIds.indexOf(order.getArrivalStationId());
             userEntity.setMileagePoints(userEntity.getMileagePoints() - basePrice.intValue());
+            switch (trainType) {
+                case HIGH_SPEED:
+                    trainEntity.setSeats(GSeriesSeatStrategy.INSTANCE.refundSeat(start, end,order.getSeat(),trainEntity.getSeats()));
+                    break;
+                case NORMAL_SPEED:
+                    trainEntity.setSeats(KSeriesSeatStrategy.INSTANCE.refundSeat(start, end,order.getSeat(),trainEntity.getSeats()));
+                    break;
+            }
+            @NotNull boolean[][] seats = trainEntity.getSeats();
+            trainEntity.setUpdatedAt(null);// force it to update
+            trainDao.saveAndFlush(trainEntity);
             userDao.save(userEntity);
             paymentStrategy.refund(order);
         }
-        order.setStatus(OrderStatus.CANCELLED);
         orderDao.save(order);
     }
 

@@ -1,7 +1,6 @@
 package org.fffd.l23o6.util.strategy.train;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -80,7 +79,7 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
 
         // Calculate offset for the seat type.
         int offset = 0;
-        for (GSeriesSeatType seatType : TYPE_MAP.keySet()) {
+        for (GSeriesSeatType seatType : GSeriesSeatType.values()) {
             if (seatType.equals(type)) {
                 break;
             }
@@ -110,7 +109,31 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
         // If no seat is available, return null.
         return null;
     }
-
+    /**
+     * @Description: 退款操作, 首先遍历TYPE_MAP, 去看values里面, value是一个图, 看图的value有么有和seat一样的(肯定有), 找到之后, key就是他相对他们那一组的偏移, 加上偏移就是结果
+     * @Param: [startStationIndex, endStationIndex, seat, seatMap]
+     * @return: void
+     * @Date: 2023/6/29
+     */
+    public boolean[][] refundSeat(int startStationIndex, int endStationIndex, String seat, boolean[][] seatMap) {
+        int offset = 0;
+        for (var x : GSeriesSeatType.values()) {
+            Map<Integer, String> t = TYPE_MAP.get(x);
+            if(t==null)
+                break;
+            for(var m:t.entrySet()){
+                if(seat.equals(m.getValue())){
+                    Integer key = m.getKey();
+                    for (int station = startStationIndex; station < endStationIndex; station++) {
+                        seatMap[station][offset+key]=false;
+                    }
+                    return seatMap;
+                }
+            }
+            offset+=t.size();
+        }
+        return seatMap;
+    }
     public Map<GSeriesSeatType, Integer> getLeftSeatCount(int startStationIndex, int endStationIndex, boolean[][] seatMap) {
         Map<GSeriesSeatType, Integer> leftSeatCount = new HashMap<>();
 

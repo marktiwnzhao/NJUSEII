@@ -10,7 +10,7 @@ import org.fffd.l23o6.pojo.enum_.OrderStatus;
  * @create: 2023-06-28 16:35
  **/
 
-public class AliStrategy extends  PaymentStrategy{
+public class AliStrategy extends PaymentStrategy {
 
     @Override
     public double pay(OrderEntity order, double v) {

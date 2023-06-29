@@ -105,12 +105,13 @@ public class OrderServiceImpl implements OrderService {
                 .arrivalTime(train.getArrivalTimes().get(endIndex))
                 .build();
     }
+
     /**
-    * @Description:  取消订单, 当这个订单是PAID的时候, 首先 去计算他的basePrice,, 通过basePrice 去退积分, 然后通过paymentStrategy去退款,其中会设置订单的状态
-    * @Param: [id]
-    * @return: void
-    * @Date: 2023/6/29
-    */
+     * @Description: 取消订单, 当这个订单是PAID的时候, 首先 去计算他的basePrice,, 通过basePrice 去退积分, 然后通过paymentStrategy去退款,其中会设置订单的状态
+     * @Param: [id]
+     * @return: void
+     * @Date: 2023/6/29
+     */
     public void cancelOrder(Long id) {
         OrderEntity order = orderDao.findById(id).get();
 
@@ -118,32 +119,33 @@ public class OrderServiceImpl implements OrderService {
             throw new BizException(BizError.ILLEAGAL_ORDER_STATUS);
         }
 
-        if(order.getStatus()==OrderStatus.PAID){
+        if (order.getStatus() == OrderStatus.PAID) {
             TrainEntity trainEntity = trainDao.findById(order.getTrainId()).get();
             UserEntity userEntity = userDao.findById(order.getUserId()).get();
             Double basePrice = calculateRawPaymentByTrainInfo(trainEntity, order.getDepartureStationId(), order.getArrivalStationId(), order.getSeat());
-            userEntity.setMileagePoints(userEntity.getMileagePoints()-basePrice.intValue());
+            userEntity.setMileagePoints(userEntity.getMileagePoints() - basePrice.intValue());
             userDao.save(userEntity);
             paymentStrategy.refund(order);
         }
         order.setStatus(OrderStatus.CANCELLED);
         orderDao.save(order);
     }
+
     /**
-    * @Description:  根据订单, 计算要花费的钱, 并且保存订单的信息和用户的信息, 首先分配作为, 计算basePrice, 计算打折后的价格, 计算支付完成后得到的积分, 保存订单, 保存积分
-    * @Param: [order]
-    * @return: double
-    * @Date: 2023/6/29
-    */
+     * @Description: 根据订单, 计算要花费的钱, 并且保存订单的信息和用户的信息, 首先分配作为, 计算basePrice, 计算打折后的价格, 计算支付完成后得到的积分, 保存订单, 保存积分
+     * @Param: [order]
+     * @return: double
+     * @Date: 2023/6/29
+     */
     private double calculateAmountAndBuy(OrderEntity order) {
         TrainEntity trainEntity = trainDao.findById(order.getTrainId()).get();
         UserEntity userEntity = userDao.findById(order.getUserId()).get();
         Long mileagePoints = userEntity.getMileagePoints();
-        Double basePrice = calculateRawPaymentByTrainInfo(trainEntity, order.getDepartureStationId(), order.getArrivalStationId(), order.getSeat());
-        userDao.save(userEntity);
+        double basePrice = calculateRawPaymentByTrainInfo(trainEntity, order.getDepartureStationId(), order.getArrivalStationId(), order.getSeat());
+
         double v = calculatePaymentByPoints(mileagePoints, basePrice);
-        userEntity.setMileagePoints(userEntity.getMileagePoints()+basePrice.intValue());
-        paymentStrategy.pay(order,v);
+        userEntity.setMileagePoints(userEntity.getMileagePoints() + (int) basePrice);
+        paymentStrategy.pay(order, v);
         order.setStatus(OrderStatus.PAID);
         userDao.save(userEntity);
         orderDao.save(order);
@@ -165,7 +167,7 @@ public class OrderServiceImpl implements OrderService {
         if (order.getStatus() != OrderStatus.PENDING_PAYMENT) {
             throw new BizException(BizError.ILLEAGAL_ORDER_STATUS);
         }
-         calculateAmountAndBuy(order);
+        calculateAmountAndBuy(order);
 
     }
 

@@ -41,4 +41,9 @@ public class StationServiceImpl implements StationService{
         entity.setName(name);
         stationDao.save(entity);
     }
+
+    @Override
+    public void delStation(Long stationId) {
+        stationDao.deleteById(stationId);
+    }
 }

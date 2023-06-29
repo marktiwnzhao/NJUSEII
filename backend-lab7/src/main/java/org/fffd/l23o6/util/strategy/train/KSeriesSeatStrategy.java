@@ -7,7 +7,7 @@ import jakarta.annotation.Nullable;
 
 public class KSeriesSeatStrategy extends TrainSeatStrategy {
     public static final KSeriesSeatStrategy INSTANCE = new KSeriesSeatStrategy();
-     
+
     private final Map<Integer, String> SOFT_SLEEPER_SEAT_MAP = new HashMap<>();
     private final Map<Integer, String> HARD_SLEEPER_SEAT_MAP = new HashMap<>();
     private final Map<Integer, String> SOFT_SEAT_MAP = new HashMap<>();
@@ -20,15 +20,17 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
         put(KSeriesSeatType.HARD_SEAT, HARD_SEAT_MAP);
     }};
 
-    private final Map<KSeriesSeatStrategy.KSeriesSeatType,Double> MONEY_PER_STARTION_MAP = new HashMap<>() {{
+    private final Map<KSeriesSeatStrategy.KSeriesSeatType, Double> MONEY_PER_STARTION_MAP = new HashMap<>() {{
         put(KSeriesSeatType.SOFT_SLEEPER_SEAT, 30.0);
         put(KSeriesSeatType.HARD_SLEEPER_SEAT, 20.0);
         put(KSeriesSeatType.SOFT_SEAT, 15.0);
         put(KSeriesSeatType.HARD_SEAT, 10.0);
     }};
-    public Double price(KSeriesSeatStrategy.KSeriesSeatType type, int len){
-        return MONEY_PER_STARTION_MAP.get(type)*len;
+
+    public Double price(KSeriesSeatStrategy.KSeriesSeatType type, int len) {
+        return MONEY_PER_STARTION_MAP.get(type) * len;
     }
+
     private KSeriesSeatStrategy() {
 
         int counter = 0;
@@ -37,13 +39,19 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
             SOFT_SLEEPER_SEAT_MAP.put(counter++, s);
         }
 
+        counter = 0;
+
         for (String s : Arrays.asList("硬卧1号上铺", "硬卧2号中铺", "硬卧3号下铺", "硬卧4号上铺", "硬卧5号中铺", "硬卧6号下铺", "硬卧7号上铺", "硬卧8号中铺", "硬卧9号下铺", "硬卧10号上铺", "硬卧11号中铺", "硬卧12号下铺")) {
             HARD_SLEEPER_SEAT_MAP.put(counter++, s);
         }
 
+        counter = 0;
+
         for (String s : Arrays.asList("1车1座", "1车2座", "1车3座", "1车4座", "1车5座", "1车6座", "1车7座", "1车8座", "2车1座", "2车2座", "2车3座", "2车4座", "2车5座", "2车6座", "2车7座", "2车8座")) {
             SOFT_SEAT_MAP.put(counter++, s);
         }
+
+        counter = 0;
 
         for (String s : Arrays.asList("3车1座", "3车2座", "3车3座", "3车4座", "3车5座", "3车6座", "3车7座", "3车8座", "3车9座", "3车10座", "4车1座", "4车2座", "4车3座", "4车4座", "4车5座", "4车6座", "4车7座", "4车8座", "4车9座", "4车10座")) {
             HARD_SEAT_MAP.put(counter++, s);
@@ -53,12 +61,15 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
     public enum KSeriesSeatType implements SeatType {
         SOFT_SLEEPER_SEAT("软卧"), HARD_SLEEPER_SEAT("硬卧"), SOFT_SEAT("软座"), HARD_SEAT("硬座"), NO_SEAT("无座");
         private String text;
-        KSeriesSeatType(String text){
-            this.text=text;
+
+        KSeriesSeatType(String text) {
+            this.text = text;
         }
+
         public String getText() {
             return this.text;
         }
+
         public static KSeriesSeatType fromString(String text) {
             for (KSeriesSeatType b : KSeriesSeatType.values()) {
                 if (b.text.equalsIgnoreCase(text)) {
@@ -114,7 +125,7 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
         int offset = 0;
         for (KSeriesSeatType type : KSeriesSeatType.values()) {
             Map<Integer, String> seatTypeMap = TYPE_MAP.get(type);
-            if(seatTypeMap==null)
+            if (seatTypeMap == null)
                 break;
             int count = 0;
             for (int i = 0; i < seatTypeMap.size(); i++) {
@@ -135,7 +146,6 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
 
         return leftSeatCount;
     }
-
 
 
     public boolean[][] initSeatMap(int stationCount) {

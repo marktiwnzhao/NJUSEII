@@ -139,18 +139,9 @@ public class OrderServiceImpl implements OrderService {
         TrainEntity trainEntity = trainDao.findById(order.getTrainId()).get();
         UserEntity userEntity = userDao.findById(order.getUserId()).get();
         Long mileagePoints = userEntity.getMileagePoints();
-        TrainVO trainVO = TrainMapper.toTrainVO(trainEntity, routeDao, order.getDepartureStationId(), order.getArrivalStationId());
-        @NotNull boolean[][] seats = trainEntity.getSeats();
-        if (trainEntity.getTrainType() == TrainType.NORMAL_SPEED) {
-            KSeriesSeatStrategy.INSTANCE.allocSeat(trainVO.getStartStationId().intValue(), trainVO.getEndStationId().intValue(), KSeriesSeatStrategy.KSeriesSeatType.fromString(order.getSeat()), seats);
-        } else if (trainEntity.getTrainType() == TrainType.HIGH_SPEED) {
-            GSeriesSeatStrategy.INSTANCE.allocSeat(trainVO.getStartStationId().intValue(), trainVO.getEndStationId().intValue(), GSeriesSeatStrategy.GSeriesSeatType.fromString(order.getSeat()), seats);
-        }
-
         Double basePrice = calculateRawPaymentByTrainInfo(trainEntity, order.getDepartureStationId(), order.getArrivalStationId(), order.getSeat());
         userDao.save(userEntity);
         double v = calculatePaymentByPoints(mileagePoints, basePrice);
-
         userEntity.setMileagePoints(userEntity.getMileagePoints()+basePrice.intValue());
         paymentStrategy.pay(order,v);
         order.setStatus(OrderStatus.PAID);

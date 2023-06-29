@@ -82,7 +82,7 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
         for (int i = 0; i < seatTypeMap.size(); i++) {
             boolean isAvailable = true;
             // Check if the seat is available for all the stations between start and end.
-            for (int station = startStationIndex; station < endStationIndex-1; station++) {
+            for (int station = startStationIndex; station < endStationIndex; station++) {
                 if (seatMap[station][offset + i]) {
                     isAvailable = false;
                     break;
@@ -91,7 +91,7 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
 
             // If seat is available, mark it as occupied and return seat name.
             if (isAvailable) {
-                for (int station = startStationIndex; station < endStationIndex-1; station++) {
+                for (int station = startStationIndex; station < endStationIndex; station++) {
                     seatMap[station][offset + i] = true;
                 }
                 return seatTypeMap.get(i);
@@ -114,7 +114,7 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
             int count = 0;
             for (int i = 0; i < seatTypeMap.size(); i++) {
                 boolean isAvailable = true;
-                for (int station = startStationIndex; station < endStationIndex-1; station++) {
+                for (int station = startStationIndex; station < endStationIndex; station++) {
                     if (seatMap[station][offset + i]) {
                         isAvailable = false;
                         break;

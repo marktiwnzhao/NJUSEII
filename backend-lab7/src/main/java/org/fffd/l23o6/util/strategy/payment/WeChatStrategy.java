@@ -1,11 +1,7 @@
 package org.fffd.l23o6.util.strategy.payment;
 
-import lombok.RequiredArgsConstructor;
-import org.fffd.l23o6.dao.RouteDao;
-import org.fffd.l23o6.dao.TrainDao;
-import org.fffd.l23o6.dao.UserDao;
 import org.fffd.l23o6.pojo.entity.OrderEntity;
-import org.springframework.stereotype.Service;
+import org.fffd.l23o6.pojo.enum_.OrderStatus;
 
 /**
  * @program: l23o6
@@ -17,7 +13,15 @@ import org.springframework.stereotype.Service;
 public class WeChatStrategy extends  PaymentStrategy{
 
     @Override
-    double pay(OrderEntity order) {
+    public double pay(OrderEntity order, double v) {
+        order.setStatus(OrderStatus.PAID);
+        return v;
+    }
+
+    @Override
+    public double refund(OrderEntity order) {
+        order.setStatus(OrderStatus.CANCELLED);
+
         return 0;
     }
 }

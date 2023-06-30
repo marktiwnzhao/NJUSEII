@@ -74,7 +74,12 @@ public class OrderServiceImpl implements OrderService {
         Long userId = userDao.findByUsername(username).getId();
         List<OrderEntity> orders = orderDao.findByUserId(userId);
         orders.sort((o1, o2) -> o2.getId().compareTo(o1.getId()));
-        return orders.stream().map(order -> {
+        return orders.stream().filter(order -> {
+            TrainEntity train = trainDao.findById(order.getTrainId()).orElse(null);
+            if(train==null) return false;
+            RouteEntity route = routeDao.findById(train.getRouteId()).orElse(null);
+            return route != null;
+        }).map(order -> {
             TrainEntity train = trainDao.findById(order.getTrainId()).get();
             RouteEntity route = routeDao.findById(train.getRouteId()).get();
             int startIndex = route.getStationIds().indexOf(order.getDepartureStationId());

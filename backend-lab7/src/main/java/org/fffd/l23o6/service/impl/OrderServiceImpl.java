@@ -119,7 +119,7 @@ public class OrderServiceImpl implements OrderService {
             throw new BizException(BizError.ILLEAGAL_ORDER_STATUS);
         }
 
-        if (order.getStatus() == OrderStatus.PAID) {
+        if (order.getStatus() == OrderStatus.PAID||order.getStatus() == OrderStatus.PENDING_PAYMENT) {
             TrainEntity trainEntity = trainDao.findById(order.getTrainId()).get();
             TrainType trainType = trainEntity.getTrainType();
             UserEntity userEntity = userDao.findById(order.getUserId()).get();
@@ -137,7 +137,6 @@ public class OrderServiceImpl implements OrderService {
                     trainEntity.setSeats(KSeriesSeatStrategy.INSTANCE.refundSeat(start, end,order.getSeat(),trainEntity.getSeats()));
                     break;
             }
-            @NotNull boolean[][] seats = trainEntity.getSeats();
             trainEntity.setUpdatedAt(null);// force it to update
             trainDao.saveAndFlush(trainEntity);
             userDao.save(userEntity);
@@ -161,7 +160,6 @@ public class OrderServiceImpl implements OrderService {
         double v = calculatePaymentByPoints(mileagePoints, basePrice);
         userEntity.setMileagePoints(userEntity.getMileagePoints() + (int) basePrice);
         paymentStrategy.pay(order, v);
-        order.setStatus(OrderStatus.PAID);
         userDao.save(userEntity);
         orderDao.save(order);
         return v;

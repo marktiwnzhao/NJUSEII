@@ -2,7 +2,7 @@
 
 import { request } from "~/utils/request";
 import { ElNotification } from "element-plus";
-import { h, onMounted, reactive, watch } from "vue";
+import {h, onMounted, reactive, ref, watch} from "vue";
 import { useStationsStore } from "~/stores/stations";
 import { parseDate } from "~/utils/date";
 import { useRouter } from "vue-router";
@@ -10,6 +10,18 @@ import { OrderDetailData } from "~/utils/interfaces";
 
 const router = useRouter()
 const stations = useStationsStore()
+
+const selectStrategyFormVisible = ref(false);
+const selectStrategyForm = ref({
+    strategy: 0
+});
+const payStrategies = ref([{
+    id: 0,
+    name: '支付宝支付'
+}, {
+    id: 1,
+    name: '微信支付'
+}])
 
 const props = defineProps({
   id: Number,
@@ -99,6 +111,30 @@ const pay = (id: number) => {
       message: h('error', { style: 'color: teal' }, error.response?.data.msg),
     })
     console.log(error)
+  })
+}
+
+const selectPayStrategy = (id : number, strategy : number) => {
+  request({
+      url: `/order/strategy`,
+      method: 'PATCH',
+      params: {
+          id: id,
+          strategy: strategy
+      }
+  }).then((res) => {
+      pay(id);
+      console.log(res);
+  }).catch((error) => {
+      if (error.response?.data.code == 100003) {
+          router.push('/login');
+      }
+      ElNotification({
+          offset: 70,
+          title: '选择支付策略失败',
+          message: h('error', { style: 'color: teal' }, error.response?.data.msg),
+      });
+      console.log(error);
   })
 }
 
@@ -218,9 +254,28 @@ getOrderDetail()
         <el-button type="danger" @click="cancel(id ?? -1)">
           取消订单
         </el-button>
-        <el-button type="primary" @click="pay(id ?? -1)">
+        <el-button type="primary" @click="selectStrategyFormVisible = true">
           支付订单
         </el-button>
+
+        <el-dialog v-model="selectStrategyFormVisible" title="请选择支付方式">
+          <el-form :model="selectStrategyForm">
+            <el-form-item label="支付方式" prop="strategy">
+              <el-select v-model="selectStrategyForm.strategy" placeholder="请选择支付方式">
+                <el-option
+                  v-for="item in payStrategies"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+          </el-form>
+          <span slot="footer" class="dialog-footer">
+            <el-button @click="selectStrategyFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="selectPayStrategy(id ?? -1, selectStrategyForm.strategy)">确 定</el-button>
+          </span>
+        </el-dialog>
       </div>
     </div>
     <div v-else-if="orderDetail.data && orderDetail.data.status === '已支付'" style="margin-top: 2vh">

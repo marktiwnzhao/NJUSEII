@@ -8,7 +8,7 @@ public interface OrderService {
     Long createOrder(String username, Long trainId, Long fromStationId, Long toStationId, String seatType, Long seatNumber);
     List<OrderVO> listOrders(String username);
     OrderVO getOrder(Long id);
-
     void cancelOrder(Long id);
+    void setPaymentStrategy(int strategy);
     void payOrder(Long id);
 }

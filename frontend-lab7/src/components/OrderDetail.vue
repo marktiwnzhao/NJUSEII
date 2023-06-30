@@ -38,6 +38,11 @@ let orderDetail = reactive<{ data: OrderDetailData }>({
     end_station_id: 0,
     departure_time: '',
     arrival_time: '',
+    money: 0,
+    point: 0,
+    raw_money:0,
+    raw_point: 0,
+    used_point: 0
   },
 })
 
@@ -247,6 +252,30 @@ getOrderDetail()
       <el-descriptions-item label="到达时间" :span="2" width="25%" align="center" v-if="orderDetail.data">
         {{ parseDate(orderDetail.data.arrival_time) }}
       </el-descriptions-item>
+      <el-descriptions-item label="金额" :span="2" width="25%" align="center" v-if="orderDetail.data && orderDetail.data.status === '等待支付'">
+        {{ orderDetail.data.money }}
+      </el-descriptions-item>
+
+      <el-descriptions-item label="得到的积分" :span="2" width="25%" align="center" v-if="orderDetail.data && orderDetail.data.status === '等待支付'">
+        {{ orderDetail.data.point }}
+      </el-descriptions-item>
+
+      <el-descriptions-item label="原金额" :span="2" width="25%" align="center" v-if="orderDetail.data && orderDetail.data.status === '等待支付'">
+        {{ orderDetail.data.raw_money }}
+      </el-descriptions-item>
+
+      <el-descriptions-item label="原积分" :span="2" width="25%" align="center" v-if="orderDetail.data && orderDetail.data.status === '等待支付'">
+        {{ orderDetail.data.raw_point }}
+      </el-descriptions-item>
+
+      <el-descriptions-item label="使用积分" :span="2" width="25%" align="center" v-if="orderDetail.data && orderDetail.data.status === '等待支付'">
+        {{ orderDetail.data.used_point }}
+      </el-descriptions-item>
+
+      <el-descriptions-item label="折扣金额" :span="2" width="25%" align="center" v-if="orderDetail.data && orderDetail.data.status === '等待支付'">
+        {{ (orderDetail.data.raw_money - orderDetail.data.money).toFixed(2) }}
+      </el-descriptions-item>
+
     </el-descriptions>
 
     <div style="margin-top: 2vh" v-if="orderDetail.data && orderDetail.data.status === '等待支付'">

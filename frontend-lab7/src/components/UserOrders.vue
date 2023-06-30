@@ -58,6 +58,10 @@ onMounted(() => {
 </script>
 
 <template>
+  <div v-if="orders.data.length === 0" style="text-align: center; margin: 2em;">
+    <el-text size="large" tag="b" type="color: gray;">没有用户订单</el-text>
+  </div>
+  <div v-else>
   <el-card v-for="order in orders.data " style="margin-bottom: 1vh" shadow="hover">
     <div style="display: flex; flex-direction: column">
 
@@ -147,6 +151,7 @@ onMounted(() => {
   <el-dialog destroy-on-close v-model="dialog" title="订单详情" width="50%">
     <OrderDetail :id="id" />
   </el-dialog>
+  </div>
 </template>
 
 <style scoped></style>

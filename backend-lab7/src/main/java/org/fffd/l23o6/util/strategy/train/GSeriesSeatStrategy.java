@@ -134,6 +134,19 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
         }
         return seatMap;
     }
+    public GSeriesSeatType seatToType(String seat) {
+        for (var x : GSeriesSeatStrategy.GSeriesSeatType.values()) {
+            Map<Integer, String> t = TYPE_MAP.get(x);
+            if(t==null)
+                break;
+            for(var m:t.entrySet()){
+                if(seat.equals(m.getValue())){
+                    return x;
+                }
+            }
+        }
+        return null;
+    }
     public Map<GSeriesSeatType, Integer> getLeftSeatCount(int startStationIndex, int endStationIndex, boolean[][] seatMap) {
         Map<GSeriesSeatType, Integer> leftSeatCount = new HashMap<>();
 

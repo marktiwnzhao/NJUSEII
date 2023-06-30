@@ -41,6 +41,12 @@ public class OrderController {
         return CommonResponse.success(orderService.getOrder(orderId));
     }
 
+    @PatchMapping("order/strategy")
+    public CommonResponse<?> patchStrategy(@RequestParam("strategy") int strategy) {
+        orderService.setPaymentStrategy(strategy);
+        return CommonResponse.success();
+    }
+
     @PatchMapping("order/{orderId}")
     public CommonResponse<?> patchOrder(@PathVariable("orderId") Long orderId, @Valid @RequestBody PatchOrderRequest request) {
 

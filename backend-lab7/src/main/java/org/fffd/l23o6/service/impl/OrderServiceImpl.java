@@ -61,8 +61,28 @@ public class OrderServiceImpl implements OrderService {
         if (seat == null) {
             throw new BizException(BizError.OUT_OF_SEAT);
         }
+        UserEntity user = userDao.findById(userId).get();
+        Long rawPoint = user.getMileagePoints();
+        Double rawMoney = null;
+        TrainType trainType = train.getTrainType();
+        switch (trainType) {
+            case HIGH_SPEED:
+                rawMoney= calculateRawPaymentByTrainInfo(train,fromStationId, toStationId,GSeriesSeatStrategy.GSeriesSeatType.fromString(seatType).getText() );
+                break;
+            case NORMAL_SPEED:
+                rawMoney= calculateRawPaymentByTrainInfo(train, fromStationId, toStationId,  KSeriesSeatStrategy.KSeriesSeatType.fromString(seatType).getText() );
+                break;
+        }
+        double money = calculatePaymentByPoints(rawPoint, rawMoney);
+        long usedPoint=calculateUsedPoints(rawPoint, rawMoney);
+        long point =moneyToPoint(rawMoney);
         OrderEntity order = OrderEntity.builder().trainId(trainId).userId(userId).seat(seat)
                 .status(OrderStatus.PENDING_PAYMENT).arrivalStationId(toStationId).departureStationId(fromStationId)
+                .rawMoney(rawMoney)
+                .point(point)
+                .rawPoint(rawPoint)
+                .money(money)
+                .usedPoint(usedPoint)
                 .build();
         train.setUpdatedAt(null);// force it to update
         trainDao.save(train);
@@ -101,22 +121,9 @@ public class OrderServiceImpl implements OrderService {
     public OrderVO getOrder(Long id) {
         OrderEntity order = orderDao.findById(id).get();
         TrainEntity train = trainDao.findById(order.getTrainId()).get();
-            RouteEntity route = routeDao.findById(train.getRouteId()).get();
-        UserEntity user = userDao.findById(order.getUserId()).get();
-        Long rawPoint = user.getMileagePoints();
-        Double rawMoney = null;
-        TrainType trainType = train.getTrainType();
-        switch (trainType) {
-            case HIGH_SPEED:
-                rawMoney= calculateRawPaymentByTrainInfo(train, order.getDepartureStationId(), order.getArrivalStationId(),GSeriesSeatStrategy.INSTANCE.seatToType(order.getSeat()).getText() );
-                break;
-            case NORMAL_SPEED:
-                rawMoney= calculateRawPaymentByTrainInfo(train, order.getDepartureStationId(), order.getArrivalStationId(), KSeriesSeatStrategy.INSTANCE.seatToType(order.getSeat()).getText() );
-                break;
-        }
-        double money = calculatePaymentByPoints(rawPoint, rawMoney);
-        long usedPoint=calculateUsedPoints(rawPoint, rawMoney);
-        long point =moneyToPoint(rawMoney);
+        RouteEntity route = routeDao.findById(train.getRouteId()).get();
+
+
         int startIndex = route.getStationIds().indexOf(order.getDepartureStationId());
         int endIndex = route.getStationIds().indexOf(order.getArrivalStationId());
         return OrderVO.builder().id(order.getId()).trainId(order.getTrainId())
@@ -126,11 +133,11 @@ public class OrderServiceImpl implements OrderService {
                 .endStationId(order.getArrivalStationId())
                 .departureTime(train.getDepartureTimes().get(startIndex))
                 .arrivalTime(train.getArrivalTimes().get(endIndex))
-                .rawMoney(rawMoney)
-                .point(point)
-                .rawPoint(rawPoint)
-                .money(money)
-                .usedPoint(usedPoint)
+                .rawMoney(order.getRawMoney())
+                .point(order.getPoint())
+                .rawPoint(order.getRawPoint())
+                .money(order.getMoney())
+                .usedPoint(order.getUsedPoint())
                 .build();
     }
 
@@ -151,26 +158,10 @@ public class OrderServiceImpl implements OrderService {
             TrainEntity trainEntity = trainDao.findById(order.getTrainId()).get();
             TrainType trainType = trainEntity.getTrainType();
             UserEntity userEntity = userDao.findById(order.getUserId()).get();
-            Double basePrice = null;
-            switch (trainType) {
-                case HIGH_SPEED:
-                    basePrice= calculateRawPaymentByTrainInfo(trainEntity, order.getDepartureStationId(), order.getArrivalStationId(),
-                            GSeriesSeatStrategy.INSTANCE.seatToType(order.getSeat()).getText() );
-                    break;
-                case NORMAL_SPEED:
-                    basePrice= calculateRawPaymentByTrainInfo(trainEntity, order.getDepartureStationId(), order.getArrivalStationId(),
-                            KSeriesSeatStrategy.INSTANCE.seatToType(order.getSeat()).getText() );
-                    break;
-            }
-            //TODO: BUG
-            long usedPoint=calculateUsedPoints(userEntity.getMileagePoints()+moneyToPoint(basePrice), basePrice);
             RouteEntity routeEntity = routeDao.findById(trainEntity.getRouteId()).get();
             List<Long> stationIds = routeEntity.getStationIds();
             int start = stationIds.indexOf(order.getDepartureStationId());
             int end = stationIds.indexOf(order.getArrivalStationId());
-            if(order.getStatus() == OrderStatus.PAID){
-                userEntity.setMileagePoints(userEntity.getMileagePoints() - moneyToPoint(basePrice)+usedPoint);
-            }
             switch (trainType) {
                 case HIGH_SPEED:
                     trainEntity.setSeats(GSeriesSeatStrategy.INSTANCE.refundSeat(start, end,order.getSeat(),trainEntity.getSeats()));
@@ -180,10 +171,10 @@ public class OrderServiceImpl implements OrderService {
                     break;
             }
             trainEntity.setUpdatedAt(null);// force it to update
-            trainEntity.setUpdatedAt(null);// force it to update
             trainDao.saveAndFlush(trainEntity);
             //只有在支付情况下,才回退款和退积分
             if(order.getStatus() == OrderStatus.PAID){
+                userEntity.setMileagePoints(order.getRawPoint());
                 userDao.save(userEntity);
                 paymentStrategy.refund(order);
             }
@@ -202,28 +193,11 @@ public class OrderServiceImpl implements OrderService {
     private double calculateAmountAndBuy(OrderEntity order) {
         TrainEntity trainEntity = trainDao.findById(order.getTrainId()).get();
         UserEntity userEntity = userDao.findById(order.getUserId()).get();
-        Long mileagePoints = userEntity.getMileagePoints();
-        Double c = null;
-        TrainType trainType = trainEntity.getTrainType();
-        double basePrice =0;
-        switch (trainType) {
-            case HIGH_SPEED:
-                basePrice= calculateRawPaymentByTrainInfo(trainEntity, order.getDepartureStationId(), order.getArrivalStationId(),
-                        GSeriesSeatStrategy.INSTANCE.seatToType(order.getSeat()).getText() );
-                break;
-            case NORMAL_SPEED:
-                basePrice= calculateRawPaymentByTrainInfo(trainEntity, order.getDepartureStationId(), order.getArrivalStationId(),
-                        KSeriesSeatStrategy.INSTANCE.seatToType(order.getSeat()).getText() );
-                break;
-        }
-        long usedPoint=calculateUsedPoints(mileagePoints, basePrice);
-        double v = calculatePaymentByPoints(mileagePoints, basePrice);
-        long point =moneyToPoint(basePrice);
-        userEntity.setMileagePoints(userEntity.getMileagePoints() +point-usedPoint);
-        paymentStrategy.pay(order, v);
+        userEntity.setMileagePoints(userEntity.getMileagePoints()- order.getUsedPoint()+order.getPoint());
+        paymentStrategy.pay(order,order.getMoney());
         userDao.save(userEntity);
         orderDao.save(order);
-        return v;
+        return order.getMoney();
 
     }
 
@@ -262,8 +236,6 @@ public class OrderServiceImpl implements OrderService {
     public double calculatePaymentByPoints(Long mileagePoints, double basePrice) {
         double discount = 0;
         long remainingPoints = mileagePoints;
-
-
         for (double[] pointsDiscount : POINTS_DISCOUNT_TABLE) {
             long pointsRange = (long) pointsDiscount[0];
             double discountRate = pointsDiscount[1] / 100; // 折扣率，转换为小数
@@ -274,7 +246,6 @@ public class OrderServiceImpl implements OrderService {
                 break;
             }
         }
-
         return basePrice - discount;
     }
     public Long calculateUsedPoints(Long mileagePoints, double basePrice) {

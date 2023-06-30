@@ -17,4 +17,10 @@ public class OrderVO {
     private String status;
     private Date createdAt;
     private String seat;
+    private Double money; // 支付费用
+    private Long point; //订单会获得的point
+    private Double rawMoney; //原来的价格
+    private Long rawPoint; //原来的积分
+    private Long usedPoint; //原来的积分
+
 }

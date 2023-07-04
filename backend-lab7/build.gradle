@@ -64,6 +64,7 @@ dependencies {
 
     // AliPay
     implementation 'com.alipay.sdk:alipay-easysdk:2.2.0'
+    implementation 'com.alipay.sdk:alipay-sdk-java:4.34.0.ALL'
 
 }
 

@@ -13,15 +13,14 @@ import org.fffd.l23o6.pojo.enum_.OrderStatus;
 public class WeChatStrategy extends PaymentStrategy {
 
     @Override
-    public double pay(OrderEntity order, double v) {
-        order.setStatus(OrderStatus.PAID);
-        return v;
+    public boolean pay(OrderEntity order) {
+
+        return true;
     }
 
     @Override
-    public double refund(OrderEntity order) {
-        order.setStatus(OrderStatus.CANCELLED);
+    public boolean refund(OrderEntity order) {
 
-        return 0;
+        return true;
     }
 }

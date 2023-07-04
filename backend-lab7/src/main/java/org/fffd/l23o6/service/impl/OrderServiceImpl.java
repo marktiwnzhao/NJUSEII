@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import jakarta.validation.constraints.NotNull;
 import org.fffd.l23o6.dao.OrderDao;
 import org.fffd.l23o6.dao.RouteDao;
 import org.fffd.l23o6.dao.TrainDao;
@@ -172,33 +171,20 @@ public class OrderServiceImpl implements OrderService {
             }
             trainEntity.setUpdatedAt(null);// force it to update
             trainDao.saveAndFlush(trainEntity);
-            //只有在支付情况下,才回退款和退积分
+            //只有在支付情况下,才会退款和退积分
             if(order.getStatus() == OrderStatus.PAID){
                 userEntity.setMileagePoints(order.getRawPoint());
-                userDao.save(userEntity);
-                paymentStrategy.refund(order);
+                if(paymentStrategy.refund(order)) {
+                    userDao.save(userEntity);
+                    order.setStatus(OrderStatus.CANCELLED);
+                }
+            } else {
+                order.setStatus(OrderStatus.CANCELLED);
             }
+
         }
 
-        order.setStatus(OrderStatus.CANCELLED);
         orderDao.save(order);
-    }
-
-    /**
-     * @Description: 根据订单, 计算要花费的钱, 并且保存订单的信息和用户的信息, 首先分配作为, 计算basePrice, 计算打折后的价格, 计算支付完成后得到的积分, 保存订单, 保存积分
-     * @Param: [order]
-     * @return: double
-     * @Date: 2023/6/29
-     */
-    private double calculateAmountAndBuy(OrderEntity order) {
-        TrainEntity trainEntity = trainDao.findById(order.getTrainId()).get();
-        UserEntity userEntity = userDao.findById(order.getUserId()).get();
-        userEntity.setMileagePoints(userEntity.getMileagePoints()- order.getUsedPoint()+order.getPoint());
-        paymentStrategy.pay(order,order.getMoney());
-        userDao.save(userEntity);
-        orderDao.save(order);
-        return order.getMoney();
-
     }
 
     public void setPaymentStrategy(int strategy) {
@@ -208,15 +194,25 @@ public class OrderServiceImpl implements OrderService {
             paymentStrategy = new AliStrategy();
         }
     }
-
+    /**
+     * @Description: 根据订单, 计算要花费的钱, 并且保存订单的信息和用户的信息, 首先分配作为, 计算basePrice, 计算打折后的价格, 计算支付完成后得到的积分, 保存订单, 保存积分
+     * @Param: id
+     * @return: double
+     * @Date: 2023/6/29
+     */
     public void payOrder(Long id) {
         OrderEntity order = orderDao.findById(id).get();
 
         if (order.getStatus() != OrderStatus.PENDING_PAYMENT) {
             throw new BizException(BizError.ILLEAGAL_ORDER_STATUS);
         }
-        calculateAmountAndBuy(order);
-
+        UserEntity userEntity = userDao.findById(order.getUserId()).get();
+        userEntity.setMileagePoints(userEntity.getMileagePoints()- order.getUsedPoint()+order.getPoint());
+        if(paymentStrategy.pay(order)) {
+            userDao.save(userEntity);
+            order.setStatus(OrderStatus.PAID);
+            orderDao.save(order);
+        }
     }
 
     private final double[][] POINTS_DISCOUNT_TABLE = {
@@ -250,7 +246,6 @@ public class OrderServiceImpl implements OrderService {
     }
     public Long calculateUsedPoints(Long mileagePoints, double basePrice) {
         long usedPoints=0;
-
 
         for (double[] pointsDiscount : POINTS_DISCOUNT_TABLE) {
             long pointsRange = (long) pointsDiscount[0];

@@ -39,7 +39,7 @@ public class TrainEntity {
     @NotNull
     @Type(BooleanArrayType.class)
     @Column(name = "seats", columnDefinition = "boolean[][]" )
-    //出发点到结束点的作为的使用情况
+    //出发点到结束点的座位的使用情况
     private boolean[][] seats;
 
     @NotNull

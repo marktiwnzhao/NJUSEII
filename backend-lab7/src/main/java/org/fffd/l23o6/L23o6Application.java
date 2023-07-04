@@ -1,5 +1,7 @@
 package org.fffd.l23o6;
 
+import com.alipay.easysdk.factory.Factory;
+import org.fffd.l23o6.util.strategy.payment.AliStrategy;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +18,8 @@ import io.swagger.v3.oas.models.info.Info;
 public class L23o6Application {
 
     public static void main(String[] args) {
+        // 全局初始化Factory
+        Factory.setOptions(AliStrategy.getOptions());
         SpringApplication.run(L23o6Application.class, args);
     }
 

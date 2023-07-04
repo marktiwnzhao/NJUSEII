@@ -79,7 +79,7 @@ public class TrainServiceImpl implements TrainService {
                     Date date1 = departureTimes.get(start);
                     DateFormat fmt =new SimpleDateFormat("yyyy-MM-dd");
                     try {
-                        if(date1.after(fmt.parse(date)))
+                        if(fmt.format(date1).equals(fmt.format(fmt.parse(date))))
                             return true;
                         else
                             return false;

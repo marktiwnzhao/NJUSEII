@@ -17,7 +17,8 @@ let form = reactive({
   name: '',
   type: '',
   idn: '',
-  phone: ''
+  phone: '',
+  mileage_points: ''
 });
 
 const setForm = async () => {
@@ -26,6 +27,7 @@ const setForm = async () => {
   form.type = user.type;
   form.idn = user.idn;
   form.phone = user.phone;
+  form.mileage_points = user.mileage_points;
 }
 
 watch(user, () => {
@@ -72,6 +74,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
         type: form.type,
         idn: form.idn,
         phone: form.phone,
+        mileage_point: form.mileage_points,
       }
     })
 
@@ -132,6 +135,10 @@ const submitForm = (formEl: FormInstance | undefined) => {
       <el-form-item label="手机号" prop="phone">
         <el-input v-model="form.phone" style="width: 25vh" :disabled="!edit" />
       </el-form-item>
+      <el-form-item label="当前积分" prop="mileage_points">
+        <el-input v-model="form.mileage_points" style="width: 25vh" :disabled="true" />
+      </el-form-item>
+
     </el-form>
   </div>
 </template>

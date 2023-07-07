@@ -13,6 +13,8 @@ import com.alipay.easysdk.kernel.util.ResponseChecker;
 
 import java.io.File;
 
+import static com.alipay.easysdk.kernel.util.ResponseChecker.*;
+
 
 /**
  * @program: l23o6
@@ -40,9 +42,8 @@ public class AliStrategy extends PaymentStrategy {
             System.err.println("调用遭遇异常，原因：" + e.getMessage());
             throw new RuntimeException(e.getMessage(), e);
         }
-        return ResponseChecker.success(response);
+        return success(response);
     }
-
     @Override
     public boolean refund(OrderEntity order) {
         double totalAmount = order.getMoney();

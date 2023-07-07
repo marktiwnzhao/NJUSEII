@@ -66,9 +66,6 @@ const handleOrder = () => {
     </el-descriptions>
 
     <div style="display: flex; justify-content: flex-end; margin-top: 3vh;">
-      <el-button @click="drawer = true">
-        查看详情
-      </el-button>
       <el-button type="primary" @click="handleOrder">
         保留
       </el-button>

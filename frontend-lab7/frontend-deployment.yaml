@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-service
+  labels:
+    app: frontend-service
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: frontend-service
+  template:
+    metadata:
+      labels:
+        app: frontend-service
+    spec:
+      hostname: frontend-service
+      containers:
+        - name: frontend-service
+          image: frontend:latest
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: EUREKA_URL
+              value: http://eureka:8080/eureka
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 1
+              memory: 512Mi
+            limits:
+              cpu: 1
+              memory: 512Mi
+        
+       

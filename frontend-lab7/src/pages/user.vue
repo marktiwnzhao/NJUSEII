@@ -31,8 +31,11 @@ const menuSelect = (key) => {
             </strong>
           </el-menu-item>
           <el-menu-item index="2">
-            <strong>
+            <strong v-if="user.privilege==0||user.privilege==2">
               订单信息
+            </strong>
+            <strong v-if="user.privilege==3">
+              保留车票信息
             </strong>
           </el-menu-item>
         </el-menu>

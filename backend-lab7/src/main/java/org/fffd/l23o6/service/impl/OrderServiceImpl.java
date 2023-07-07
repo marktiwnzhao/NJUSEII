@@ -39,7 +39,17 @@ public class OrderServiceImpl implements OrderService {
     private final RouteDao routeDao;
     PaymentStrategy paymentStrategy = new WeChatStrategy();
 
-    //创建订单
+    /**
+     * 创建订单
+     *
+     * @param username      用户名
+     * @param trainId       列车ID
+     * @param fromStationId 起始站点ID
+     * @param toStationId   目的站点ID
+     * @param seatType      座位类型
+     * @param seatNumber    座位数量
+     * @return 订单ID
+     */
     public Long createOrder(String username, Long trainId, Long fromStationId, Long toStationId, String seatType,
                             Long seatNumber) {
         Long userId = userDao.findByUsername(username).getId();
@@ -67,15 +77,17 @@ public class OrderServiceImpl implements OrderService {
         TrainType trainType = train.getTrainType();
         switch (trainType) {
             case HIGH_SPEED:
-                rawMoney= calculateRawPaymentByTrainInfo(train,fromStationId, toStationId,GSeriesSeatStrategy.GSeriesSeatType.fromString(seatType).getText() );
+                rawMoney = calculateRawPaymentByTrainInfo(train, fromStationId, toStationId,
+                        GSeriesSeatStrategy.GSeriesSeatType.fromString(seatType).getText());
                 break;
             case NORMAL_SPEED:
-                rawMoney= calculateRawPaymentByTrainInfo(train, fromStationId, toStationId,  KSeriesSeatStrategy.KSeriesSeatType.fromString(seatType).getText() );
+                rawMoney = calculateRawPaymentByTrainInfo(train, fromStationId, toStationId,
+                        KSeriesSeatStrategy.KSeriesSeatType.fromString(seatType).getText());
                 break;
         }
         double money = calculatePaymentByPoints(rawPoint, rawMoney);
-        long usedPoint=calculateUsedPoints(rawPoint, rawMoney);
-        long point =moneyToPoint(rawMoney);
+        long usedPoint = calculateUsedPoints(rawPoint, rawMoney);
+        long point = moneyToPoint(rawMoney);
         OrderEntity order = OrderEntity.builder().trainId(trainId).userId(userId).seat(seat)
                 .status(OrderStatus.PENDING_PAYMENT).arrivalStationId(toStationId).departureStationId(fromStationId)
                 .rawMoney(rawMoney)
@@ -84,7 +96,7 @@ public class OrderServiceImpl implements OrderService {
                 .money(money)
                 .usedPoint(usedPoint)
                 .build();
-        train.setUpdatedAt(null);// force it to update
+        train.setUpdatedAt(null); // force it to update
         trainDao.save(train);
         orderDao.save(order);
         return order.getId();
@@ -92,15 +104,20 @@ public class OrderServiceImpl implements OrderService {
     public Long moneyToPoint(double money){
         return  (long)money*10;
     }
-
-    //展示订单
+    /**
+     * 根据用户名获取订单列表
+     *
+     * @param username 用户名
+     * @return 订单VO列表
+     */
     public List<OrderVO> listOrders(String username) {
         Long userId = userDao.findByUsername(username).getId();
         List<OrderEntity> orders = orderDao.findByUserId(userId);
         orders.sort((o1, o2) -> o2.getId().compareTo(o1.getId()));
         return orders.stream().filter(order -> {
             TrainEntity train = trainDao.findById(order.getTrainId()).orElse(null);
-            if(train==null) return false;
+            if (train == null)
+                return false;
             RouteEntity route = routeDao.findById(train.getRouteId()).orElse(null);
             return route != null;
         }).map(order -> {
@@ -119,11 +136,16 @@ public class OrderServiceImpl implements OrderService {
         }).collect(Collectors.toList());
     }
 
+    /**
+     * 根据订单ID获取订单详情
+     *
+     * @param id 订单ID
+     * @return 订单VO
+     */
     public OrderVO getOrder(Long id) {
         OrderEntity order = orderDao.findById(id).get();
         TrainEntity train = trainDao.findById(order.getTrainId()).get();
         RouteEntity route = routeDao.findById(train.getRouteId()).get();
-
 
         int startIndex = route.getStationIds().indexOf(order.getDepartureStationId());
         int endIndex = route.getStationIds().indexOf(order.getArrivalStationId());
@@ -143,10 +165,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * @Description: 取消订单, 当这个订单是PAID的时候, 首先 去计算他的basePrice,, 通过basePrice 去退积分, 然后通过paymentStrategy去退款,其中会设置订单的状态
-     * @Param: [id]
-     * @return: void
-     * @Date: 2023/6/29
+     * 取消订单
+     *
+     * @param id 订单ID
      */
     public void cancelOrder(Long id) {
         OrderEntity order = orderDao.findById(id).get();
@@ -155,7 +176,7 @@ public class OrderServiceImpl implements OrderService {
             throw new BizException(BizError.ILLEAGAL_ORDER_STATUS);
         }
 
-        if (order.getStatus() == OrderStatus.PAID||order.getStatus() == OrderStatus.PENDING_PAYMENT) {
+        if (order.getStatus() == OrderStatus.PAID || order.getStatus() == OrderStatus.PENDING_PAYMENT) {
             TrainEntity trainEntity = trainDao.findById(order.getTrainId()).get();
             TrainType trainType = trainEntity.getTrainType();
             UserEntity userEntity = userDao.findById(order.getUserId()).get();
@@ -165,18 +186,20 @@ public class OrderServiceImpl implements OrderService {
             int end = stationIds.indexOf(order.getArrivalStationId());
             switch (trainType) {
                 case HIGH_SPEED:
-                    trainEntity.setSeats(GSeriesSeatStrategy.INSTANCE.refundSeat(start, end,order.getSeat(),trainEntity.getSeats()));
+                    trainEntity.setSeats(GSeriesSeatStrategy.INSTANCE.refundSeat(start, end, order.getSeat(),
+                            trainEntity.getSeats()));
                     break;
                 case NORMAL_SPEED:
-                    trainEntity.setSeats(KSeriesSeatStrategy.INSTANCE.refundSeat(start, end,order.getSeat(),trainEntity.getSeats()));
+                    trainEntity.setSeats(KSeriesSeatStrategy.INSTANCE.refundSeat(start, end, order.getSeat(),
+                            trainEntity.getSeats()));
                     break;
             }
-            trainEntity.setUpdatedAt(null);// force it to update
+            trainEntity.setUpdatedAt(null); // force it to update
             trainDao.saveAndFlush(trainEntity);
-            //只有在支付情况下,才会退款和退积分
-            if(order.getStatus() == OrderStatus.PAID){
+            // 只有在支付情况下才会退款和退积分
+            if (order.getStatus() == OrderStatus.PAID) {
                 userEntity.setMileagePoints(order.getRawPoint());
-                if(paymentStrategy.refund(order)) {
+                if (paymentStrategy.refund(order)) {
                     userDao.save(userEntity);
                     order.setStatus(OrderStatus.CANCELLED);
                 }
@@ -189,6 +212,11 @@ public class OrderServiceImpl implements OrderService {
         orderDao.save(order);
     }
 
+    /**
+     * 设置支付策略
+     *
+     * @param strategy 支付策略
+     */
     public void setPaymentStrategy(int strategy) {
         if (strategy == 1) {
             paymentStrategy = new WeChatStrategy();
@@ -196,13 +224,12 @@ public class OrderServiceImpl implements OrderService {
             paymentStrategy = new AliStrategy();
         }
     }
+
     /**
-     * @Description: 根据订单, 计算要花费的钱, 并且保存订单的信息和用户的信息, 首先分配作为, 计算basePrice, 计算打折后的价格, 计算支付完成后得到的积分, 保存订单, 保存积分
-     * @Param: id
-     * @return: double
-     * @Date: 2023/6/29
+     * 支付订单
+     *
+     * @param id 订单ID
      */
-    //支付订单
     public void payOrder(Long id) {
         OrderEntity order = orderDao.findById(id).get();
 
@@ -210,8 +237,8 @@ public class OrderServiceImpl implements OrderService {
             throw new BizException(BizError.ILLEAGAL_ORDER_STATUS);
         }
         UserEntity userEntity = userDao.findById(order.getUserId()).get();
-        userEntity.setMileagePoints(userEntity.getMileagePoints()- order.getUsedPoint()+order.getPoint());
-        if(paymentStrategy.pay(order)) {
+        userEntity.setMileagePoints(userEntity.getMileagePoints() - order.getUsedPoint() + order.getPoint());
+        if (paymentStrategy.pay(order)) {
             userDao.save(userEntity);
             order.setStatus(OrderStatus.PAID);
             orderDao.save(order);
@@ -227,10 +254,11 @@ public class OrderServiceImpl implements OrderService {
     };
 
     /**
-     * @Description: 通过积分和basePrice来计算价格
-     * @Param: [mileagePoints, basePrice]
-     * @return: double
-     * @Date: 2023/6/28
+     * 根据积分和基准价格计算支付金额
+     *
+     * @param mileagePoints 积分
+     * @param basePrice     基准价格
+     * @return 支付金额
      */
     public double calculatePaymentByPoints(Long mileagePoints, double basePrice) {
         double discount = 0;
@@ -238,7 +266,7 @@ public class OrderServiceImpl implements OrderService {
         for (double[] pointsDiscount : POINTS_DISCOUNT_TABLE) {
             long pointsRange = (long) pointsDiscount[0];
             double discountRate = pointsDiscount[1] / 100; // 折扣率，转换为小数
-            //大于了就可以减去
+            // 大于了就可以减去
             if (remainingPoints >= pointsRange) {
                 discount += basePrice * discountRate;
             } else {
@@ -247,29 +275,39 @@ public class OrderServiceImpl implements OrderService {
         }
         return basePrice - discount;
     }
+
+    /**
+     * 计算使用的积分
+     *
+     * @param mileagePoints 积分
+     * @param basePrice     基准价格
+     * @return 使用的积分
+     */
     public Long calculateUsedPoints(Long mileagePoints, double basePrice) {
-        long usedPoints=0;
+        long usedPoints = 0;
 
         for (double[] pointsDiscount : POINTS_DISCOUNT_TABLE) {
             long pointsRange = (long) pointsDiscount[0];
 
             if (mileagePoints >= pointsRange) {
-                usedPoints=pointsRange;
+                usedPoints = pointsRange;
             } else {
                 break;
-
             }
         }
         return usedPoints;
     }
 
     /**
-     * @Description:
-     * @Param: [stationIds]
-     * @return: double
-     * @Date: 2023/6/28
+     * 根据列车信息计算原始支付金额
+     *
+     * @param entity       列车实体
+     * @param start        起始站点ID
+     * @param end          终点站点ID
+     * @param type         座位类型
+     * @return 原始支付金额
      */
-    public double calculateRawPaymentByTrainInfo(TrainEntity entity, Long start, Long end, String type) {
+    public double calculateRawPaymentByTrainInfo(TrainEntity entity, Long start,Long end, String type) {
 
         TrainVO trainVO = TrainMapper.toTrainVO(entity, routeDao, start, end);
 

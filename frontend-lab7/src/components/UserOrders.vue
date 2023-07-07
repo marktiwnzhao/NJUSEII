@@ -7,6 +7,7 @@ import { Right } from "@element-plus/icons-vue";
 import { useStationsStore } from "~/stores/stations";
 import { useRouter } from "vue-router";
 import { OrderDetailData } from "~/utils/interfaces";
+import {useUserStore} from "~/stores/user";
 
 let orders = reactive({
   data: [] as OrderDetailData[]
@@ -14,6 +15,7 @@ let orders = reactive({
 
 const router = useRouter()
 const stations = useStationsStore()
+const user = useUserStore()
 
 let dialog = ref(false)
 let id = ref()
@@ -62,10 +64,10 @@ onMounted(() => {
     <el-text size="large" tag="b" type="color: gray;">没有用户订单</el-text>
   </div>
   <div v-else>
-  <el-card v-for="order in orders.data " style="margin-bottom: 1vh" shadow="hover">
+  <el-card v-for="order in orders.data " style="margin-bottom: 1vh" shadow="hover" v-if="user.privilege==0||user.privilege==2">
     <div style="display: flex; flex-direction: column">
 
-      <div style="display: flex; justify-content: space-between;">
+      <div style="display: flex; justify-content: space-between;" >
         <div>
           <el-text size="large" tag="b" type="primary">
             订单号:&nbsp;&nbsp;
@@ -147,7 +149,82 @@ onMounted(() => {
 
   </el-card>
 
+    <el-card v-for="order in orders.data " style="margin-bottom: 1vh" shadow="hover" v-if="user.privilege==3">
+      <div style="display: flex; flex-direction: column">
 
+        <div style="display: flex; justify-content: space-between;" >
+          <div>
+            <el-text size="large" tag="b" type="primary">
+              保留编号:&nbsp;&nbsp;
+            </el-text>
+            <el-text size="large" tag="b">
+              {{ order.id }}
+            </el-text>
+          </div>
+          <div>
+            <el-text size="large" tag="b" type="primary">
+              创建日期:&nbsp;&nbsp;
+            </el-text>
+            <el-text size="large" tag="b">
+              {{ parseDate(order.created_at) }}
+            </el-text>
+          </div>
+        </div>
+
+        <div>
+          <el-text size="large" tag="b" type="primary">
+            保留状态:&nbsp;&nbsp;
+          </el-text>
+          <el-text size="large" tag="b">
+            {{ (order.status=="等待支付")?"已保留":"已取消保留" }}
+          </el-text>
+        </div>
+
+        <el-row class="el-row">
+          <el-col :span="24" style="display: flex; justify-content: center; align-items: center">
+            <el-text type="primary" size="large" tag="b">
+              {{ getTrainName(order.train_id) }}
+            </el-text>
+          </el-col>
+        </el-row>
+
+        <el-row justify="center" class="el-row">
+          <el-col :span="11" style="display: flex; justify-content: right; align-items: center">
+            <el-text>
+              {{ stations.idToName[order.start_station_id] }}
+            </el-text>
+          </el-col>
+          <el-col :span="2" style="display: flex; justify-content: center; align-items: center">
+            <el-icon size="15">
+              <Right />
+            </el-icon>
+          </el-col>
+          <el-col :span="11" style="display: flex; justify-content: left; align-items: center;">
+            <el-text style="text-align: center">
+              {{ stations.idToName[order.end_station_id] }}
+            </el-text>
+          </el-col>
+        </el-row>
+
+        <el-row justify="center">
+          <el-col :span="11" style="display: flex; justify-content: right; align-items: center">
+            <el-text>
+              {{ parseDate(order.departure_time) }}
+            </el-text>
+          </el-col>
+          <el-col :span="2">
+          </el-col>
+          <el-col :span="11" style="display: flex; justify-content: left; align-items: center">
+            <el-text>
+              {{ parseDate(order.arrival_time) }}
+            </el-text>
+          </el-col>
+        </el-row>
+      </div>
+
+
+
+    </el-card>
   <el-dialog destroy-on-close v-model="dialog" title="订单详情" width="50%">
     <OrderDetail :id="id" />
   </el-dialog>

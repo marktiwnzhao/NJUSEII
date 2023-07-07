@@ -97,7 +97,7 @@ const submitOrderForm = (formEl: FormInstance | undefined) => {
 <template>
   <div>
     <el-text size="large" type="primary" style="display: flex;justify-content: center">
-      <h1>订单确认</h1>
+      <h1>车票保留</h1>
     </el-text>
     <br />
   </div>

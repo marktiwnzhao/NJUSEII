@@ -1,21 +1,13 @@
 package org.fffd.l23o6.service.impl;
 
 import io.github.lyc8503.spring.starter.incantation.exception.BizException;
-import org.fffd.l23o6.dao.StationDao;
 import org.fffd.l23o6.dao.UserDao;
 import org.fffd.l23o6.pojo.entity.UserEntity;
-import org.fffd.l23o6.pojo.vo.station.StationVO;
-import org.fffd.l23o6.service.StationService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -60,7 +52,7 @@ class UserServiceImplTest {
     void test_2() {
         service.editInfo("user1", "123", "123", "123", "123");
         UserEntity user1 = service.findByUserName("user1");
-        assertEquals("user1", user1.getName());
+        assertEquals("123", user1.getName());
         assertEquals("123", user1.getPhone());
         assertEquals("123", user1.getIdn());
         assertEquals("123", user1.getType());

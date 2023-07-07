@@ -30,6 +30,7 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userDao.findByUsername(username);
 
         if (user != null) {
+            //防御式编程
             throw new BizException(BizError.USERNAME_EXISTS);
         }
 
@@ -58,6 +59,7 @@ public class UserServiceImpl implements UserService {
     public void login(String username, String password) {
         UserEntity user = userDao.findByUsername(username);
         if (user == null || !BCrypt.checkpw(password, user.getPassword())) {
+            //防御式编程
             throw new BizException(BizError.INVALID_CREDENTIAL);
         }
     }
@@ -75,6 +77,7 @@ public class UserServiceImpl implements UserService {
     public void editInfo(String username, String name, String idn, String phone, String type) {
         UserEntity user = userDao.findByUsername(username);
         if (user == null) {
+            //防御式编程
             throw new BizException(CommonErrorType.ILLEGAL_ARGUMENTS, "用户不存在");
         }
         userDao.save(user.setIdn(idn).setName(name).setPhone(phone).setType(type));

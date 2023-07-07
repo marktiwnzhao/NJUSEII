@@ -86,7 +86,7 @@ public class OrderServiceImpl implements OrderService {
                 break;
         }
         double money = calculatePaymentByPoints(rawPoint, rawMoney);
-        long usedPoint = calculateUsedPoints(rawPoint, rawMoney);
+        long usedPoint = calculateUsedPoints(rawPoint);
         long point = moneyToPoint(rawMoney);
         OrderEntity order = OrderEntity.builder().trainId(trainId).userId(userId).seat(seat)
                 .status(OrderStatus.PENDING_PAYMENT).arrivalStationId(toStationId).departureStationId(fromStationId)
@@ -173,6 +173,7 @@ public class OrderServiceImpl implements OrderService {
         OrderEntity order = orderDao.findById(id).get();
 
         if (order.getStatus() == OrderStatus.COMPLETED || order.getStatus() == OrderStatus.CANCELLED) {
+            //防御式编程
             throw new BizException(BizError.ILLEAGAL_ORDER_STATUS);
         }
 
@@ -218,12 +219,18 @@ public class OrderServiceImpl implements OrderService {
      * @param strategy 支付策略
      */
     public void setPaymentStrategy(int strategy) {
+        if (strategy != 1 && strategy != 0) {
+            //防御式编程
+            throw new IllegalArgumentException("Invalid payment strategy. Strategy must be 1 (WeChat) or 2 (Ali).");
+        }
+
         if (strategy == 1) {
             paymentStrategy = new WeChatStrategy();
         } else {
             paymentStrategy = new AliStrategy();
         }
     }
+
 
     /**
      * 支付订单
@@ -261,6 +268,14 @@ public class OrderServiceImpl implements OrderService {
      * @return 支付金额
      */
     public double calculatePaymentByPoints(Long mileagePoints, double basePrice) {
+        //防御式编程
+        if (mileagePoints < 0) {
+            throw new IllegalArgumentException("Mileage points cannot be negative.");
+        }
+
+        if (basePrice <= 0) {
+            throw new IllegalArgumentException("Base price must be positive and non-zero.");
+        }
         double discount = 0;
         long remainingPoints = mileagePoints;
         for (double[] pointsDiscount : POINTS_DISCOUNT_TABLE) {
@@ -280,10 +295,13 @@ public class OrderServiceImpl implements OrderService {
      * 计算使用的积分
      *
      * @param mileagePoints 积分
-     * @param basePrice     基准价格
      * @return 使用的积分
      */
-    public Long calculateUsedPoints(Long mileagePoints, double basePrice) {
+    public Long calculateUsedPoints(Long mileagePoints) {
+
+        if (mileagePoints < 0) {
+            throw new IllegalArgumentException("Mileage points cannot be negative.");
+        }
         long usedPoints = 0;
 
         for (double[] pointsDiscount : POINTS_DISCOUNT_TABLE) {

@@ -40,6 +40,7 @@ public class StationServiceImpl implements StationService {
     public void addStation(String name) {
         StationEntity entity = stationDao.findByName(name);
         if (entity != null) {
+            //防御式编程
             throw new BizException(BizError.STATIONNAME_EXISTS);
         }
         stationDao.save(StationEntity.builder().name(name).build());

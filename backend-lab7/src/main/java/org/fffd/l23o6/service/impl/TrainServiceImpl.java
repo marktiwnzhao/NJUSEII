@@ -76,10 +76,10 @@ public class TrainServiceImpl implements TrainService {
                     int start = routeEntity.getStationIds().indexOf(startStationId);
                     //开始站的出发时间
                     List<Date> departureTimes = trainEntity.getDepartureTimes();
-                    Date date1 = departureTimes.get(start);
+                    Date departureDate = departureTimes.get(start);
                     DateFormat fmt =new SimpleDateFormat("yyyy-MM-dd");
                     try {
-                        if(fmt.format(date1).equals(fmt.format(fmt.parse(date))))
+                        if(fmt.format(departureDate).equals(fmt.format(fmt.parse(date))))
                             return true;
                         else
                             return false;

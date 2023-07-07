@@ -38,7 +38,12 @@ public class UserEntity {
     private String type;
     private String idn;
     private Long mileagePoints;
+    //客户  0
+    //铁路管理员 1
+    //票务员     2
+    //余票管理员 3
 
+    private Long privilege;
     @CreationTimestamp
     private Date createdAt;
 

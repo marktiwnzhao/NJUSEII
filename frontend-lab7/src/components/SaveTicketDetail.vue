@@ -13,14 +13,14 @@ const stations = useStationsStore()
 
 const selectStrategyFormVisible = ref(false);
 const selectStrategyForm = ref({
-    strategy: 0
+  strategy: 0
 });
 const payStrategies = ref([{
-    id: 0,
-    name: '支付宝支付'
+  id: 0,
+  name: '支付宝支付'
 }, {
-    id: 1,
-    name: '微信支付'
+  id: 1,
+  name: '微信支付'
 }])
 
 const props = defineProps({
@@ -122,25 +122,25 @@ const pay = (id: number) => {
 
 const selectPayStrategy = (id : number, strategy : number) => {
   request({
-      url: `/order/strategy`,
-      method: 'PATCH',
-      params: {
-          id: id,
-          strategy: strategy
-      }
+    url: `/order/strategy`,
+    method: 'PATCH',
+    params: {
+      id: id,
+      strategy: strategy
+    }
   }).then((res) => {
-      pay(id);
-      console.log(res);
+    pay(id);
+    console.log(res);
   }).catch((error) => {
-      if (error.response?.data.code == 100003) {
-          router.push('/login');
-      }
-      ElNotification({
-          offset: 70,
-          title: '选择支付策略失败',
-          message: h('error', { style: 'color: teal' }, error.response?.data.msg),
-      });
-      console.log(error);
+    if (error.response?.data.code == 100003) {
+      router.push('/login');
+    }
+    ElNotification({
+      offset: 70,
+      title: '选择支付策略失败',
+      message: h('error', { style: 'color: teal' }, error.response?.data.msg),
+    });
+    console.log(error);
   })
 }
 
@@ -197,7 +197,7 @@ getOrderDetail()
     <div style="display: flex; justify-content: space-between;">
       <div>
         <el-text size="large" tag="b" type="primary">
-          订单号:&nbsp;&nbsp;
+          保留号:&nbsp;&nbsp;
         </el-text>
         <el-text size="large" tag="b">
           {{ props.id }}
@@ -211,15 +211,6 @@ getOrderDetail()
           {{ parseDate(orderDetail.data.created_at) }}
         </el-text>
       </div>
-    </div>
-
-    <div>
-      <el-text size="large" tag="b" type="primary">
-        订单状态:&nbsp;&nbsp;
-      </el-text>
-      <el-text size="large" tag="b" v-if="orderDetail.data">
-        {{ orderDetail.data.status }}
-      </el-text>
     </div>
     <div style="margin-bottom: 2vh">
       <el-text size="large" tag="b" type="primary">
@@ -253,65 +244,16 @@ getOrderDetail()
       <el-descriptions-item label="到达时间" :span="2" width="25%" align="center" v-if="orderDetail.data">
         {{ parseDate(orderDetail.data.arrival_time) }}
       </el-descriptions-item>
-      <el-descriptions-item label="金额" :span="2" width="25%" align="center" v-if="orderDetail.data">
-        {{ (orderDetail.data.money).toFixed(2) }}
-      </el-descriptions-item>
-
-      <el-descriptions-item label="得到的积分" :span="2" width="25%" align="center" v-if="orderDetail.data">
-        {{ orderDetail.data.point }}
-      </el-descriptions-item>
-
-      <el-descriptions-item label="原金额" :span="2" width="25%" align="center" v-if="orderDetail.data">
-        {{ ( orderDetail.data.raw_money).toFixed(2) }}
-      </el-descriptions-item>
-
-      <el-descriptions-item label="原积分" :span="2" width="25%" align="center" v-if="orderDetail.data">
-        {{ orderDetail.data.raw_point }}
-      </el-descriptions-item>
-      <el-descriptions-item label="使用积分" :span="2" width="25%" align="center" v-if="orderDetail.data">
-        {{ orderDetail.data.used_point }}
-      </el-descriptions-item>
-      <el-descriptions-item label="折扣金额" :span="2" width="25%" align="center" v-if="orderDetail.data">
-        {{ ((orderDetail.data.raw_money).toFixed(2) - (orderDetail.data.money).toFixed(2)).toFixed(2) }}
-      </el-descriptions-item>
     </el-descriptions>
 
     <div style="margin-top: 2vh" v-if="orderDetail.data && orderDetail.data.status === '等待支付'">
       <div style="float:right;">
         <el-button type="danger" @click="cancel(id ?? -1)">
-          取消订单
+          取消
         </el-button>
-        <el-button type="primary" @click="selectStrategyFormVisible = true">
-          支付订单
-        </el-button>
+      </div>
+    </div>
 
-        <el-dialog v-model="selectStrategyFormVisible" title="请选择支付方式">
-          <el-form :model="selectStrategyForm">
-            <el-form-item label="支付方式" prop="strategy">
-              <el-select v-model="selectStrategyForm.strategy" placeholder="请选择支付方式">
-                <el-option
-                  v-for="item in payStrategies"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.id"
-                ></el-option>
-              </el-select>
-            </el-form-item>
-          </el-form>
-          <span slot="footer" class="dialog-footer">
-            <el-button @click="selectStrategyFormVisible = false">取 消</el-button>
-            <el-button type="primary" @click="selectPayStrategy(id ?? -1, selectStrategyForm.strategy)">确 定</el-button>
-          </span>
-        </el-dialog>
-      </div>
-    </div>
-    <div v-else-if="orderDetail.data && orderDetail.data.status === '已支付'" style="margin-top: 2vh">
-      <div style="float:right;">
-        <el-button @click="cancel(id ?? -1)">
-          取消订单
-        </el-button>
-      </div>
-    </div>
 
   </div>
 </template>

@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
         }
 
         userDao.save(UserEntity.builder().username(username).password(BCrypt.hashpw(password))
-                .name(name).idn(idn).phone(phone).type(type).mileagePoints(0L).build());
+                .name(name).idn(idn).phone(phone).type(type).mileagePoints(0L).privilege(0L).build());
     }
 
     @Override

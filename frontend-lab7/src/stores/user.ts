@@ -10,7 +10,7 @@ export const useUserStore = defineStore('user', {
             idn: '',
             phone: '',
             mileage_points: '',
-            privilege: false
+            privilege: 0
         }
     },
     getters: {

@@ -19,6 +19,7 @@ let form = reactive({
   idn: '',
   phone: '',
   mileage_points: '',
+  privilege: 0
 });
 
 const setForm = async () => {

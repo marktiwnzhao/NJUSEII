@@ -39,6 +39,7 @@ public class OrderServiceImpl implements OrderService {
     private final RouteDao routeDao;
     PaymentStrategy paymentStrategy = new WeChatStrategy();
 
+    //创建订单
     public Long createOrder(String username, Long trainId, Long fromStationId, Long toStationId, String seatType,
                             Long seatNumber) {
         Long userId = userDao.findByUsername(username).getId();
@@ -92,6 +93,7 @@ public class OrderServiceImpl implements OrderService {
         return  (long)money*10;
     }
 
+    //展示订单
     public List<OrderVO> listOrders(String username) {
         Long userId = userDao.findByUsername(username).getId();
         List<OrderEntity> orders = orderDao.findByUserId(userId);
@@ -200,6 +202,7 @@ public class OrderServiceImpl implements OrderService {
      * @return: double
      * @Date: 2023/6/29
      */
+    //支付订单
     public void payOrder(Long id) {
         OrderEntity order = orderDao.findById(id).get();
 

@@ -11,6 +11,8 @@ import com.alipay.easysdk.factory.Factory;
 import com.alipay.easysdk.kernel.Config;
 import com.alipay.easysdk.kernel.util.ResponseChecker;
 
+import java.io.File;
+
 
 /**
  * @program: l23o6
@@ -54,6 +56,7 @@ public class AliStrategy extends PaymentStrategy {
         AlipayTradeRefundResponse response;
         try {
             response = alipayClient.execute(request);
+
             return true;
         } catch (Exception e) {
             System.err.println("调用遭遇异常，原因：" + e.getMessage());

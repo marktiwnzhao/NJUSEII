@@ -151,6 +151,7 @@ public class TrainServiceImpl implements TrainService {
         // 检查到达时间和出发时间列表的长度是否与路线站点数量一致
         if (route.getStationIds().size() != entity.getArrivalTimes().size()
                 || route.getStationIds().size() != entity.getDepartureTimes().size()) {
+            //防御式编程
             throw new BizException(CommonErrorType.ILLEGAL_ARGUMENTS, "列表长度错误");
         }
 
@@ -203,6 +204,7 @@ public class TrainServiceImpl implements TrainService {
         // 检查到达时间和出发时间列表的长度是否与路线站点数量一致
         if (route.getStationIds().size() != entity.getArrivalTimes().size()
                 || route.getStationIds().size() != entity.getDepartureTimes().size()) {
+            //防御式编程
             throw new BizException(CommonErrorType.ILLEGAL_ARGUMENTS, "列表长度错误");
         }
 

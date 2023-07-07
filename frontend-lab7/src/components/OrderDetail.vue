@@ -7,9 +7,11 @@ import { useStationsStore } from "~/stores/stations";
 import { parseDate } from "~/utils/date";
 import { useRouter } from "vue-router";
 import { OrderDetailData } from "~/utils/interfaces";
+import {useUserStore} from "~/stores/user";
 
 const router = useRouter()
 const stations = useStationsStore()
+const user = useUserStore()
 
 const selectStrategyFormVisible = ref(false);
 const selectStrategyForm = ref({
@@ -253,25 +255,27 @@ getOrderDetail()
       <el-descriptions-item label="到达时间" :span="2" width="25%" align="center" v-if="orderDetail.data">
         {{ parseDate(orderDetail.data.arrival_time) }}
       </el-descriptions-item>
-      <el-descriptions-item label="金额" :span="2" width="25%" align="center" v-if="orderDetail.data">
+      <el-descriptions-item label="金额" :span="2" width="25%" align="center" v-if="orderDetail.data&&user.privilege==0">
         {{ (orderDetail.data.money).toFixed(2) }}
       </el-descriptions-item>
 
-      <el-descriptions-item label="得到的积分" :span="2" width="25%" align="center" v-if="orderDetail.data">
+      <el-descriptions-item label="得到的积分" :span="2" width="25%" align="center"  v-if="orderDetail.data&&user.privilege==0">
         {{ orderDetail.data.point }}
       </el-descriptions-item>
 
-      <el-descriptions-item label="原金额" :span="2" width="25%" align="center" v-if="orderDetail.data">
+      <el-descriptions-item label="未打折金额" :span="2" width="25%" align="center" v-if="orderDetail.data&&user.privilege==0" >
         {{ ( orderDetail.data.raw_money).toFixed(2) }}
       </el-descriptions-item>
-
-      <el-descriptions-item label="原积分" :span="2" width="25%" align="center" v-if="orderDetail.data">
+      <el-descriptions-item label="总金额" :span="2" width="25%" align="center" v-if="orderDetail.data&&user.privilege==2" >
+        {{ ( orderDetail.data.raw_money).toFixed(2) }}
+      </el-descriptions-item>
+      <el-descriptions-item label="原积分" :span="2" width="25%" align="center" v-if="orderDetail.data&&user.privilege==0">
         {{ orderDetail.data.raw_point }}
       </el-descriptions-item>
-      <el-descriptions-item label="使用积分" :span="2" width="25%" align="center" v-if="orderDetail.data">
+      <el-descriptions-item label="使用积分" :span="2" width="25%" align="center" v-if="orderDetail.data&&user.privilege==0">
         {{ orderDetail.data.used_point }}
       </el-descriptions-item>
-      <el-descriptions-item label="折扣金额" :span="2" width="25%" align="center" v-if="orderDetail.data">
+      <el-descriptions-item label="折扣金额" :span="2" width="25%" align="center" v-if="orderDetail.data&&user.privilege==0">
         {{ ((orderDetail.data.raw_money).toFixed(2) - (orderDetail.data.money).toFixed(2)).toFixed(2) }}
       </el-descriptions-item>
     </el-descriptions>

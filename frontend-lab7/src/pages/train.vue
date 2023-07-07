@@ -8,9 +8,11 @@ import TrainManageDetail from "~/components/TrainManageDetail.vue";
 import TrainManageForm from "~/components/TrainManageForm.vue";
 import { useRouter } from "vue-router";
 import { TrainInfo } from "~/utils/interfaces";
+import {useUserStore} from "~/stores/user";
 
 const router = useRouter()
 const stations = useStationsStore()
+const user = useUserStore()
 
 let trainName = ref('')
 let trains = [] as TrainInfo[];
@@ -206,9 +208,18 @@ onMounted(() => {
       <div style="display: flex; justify-content: center">
         <div style="display: flex; width: 80vh; justify-content: flex-end">
           <el-space>
-            <el-button type="primary" @click="add = true">
-              添加
-            </el-button>
+            <h1 v-if="!user.privilege">
+              <el-button :disabled="true" type="primary" @click="add = true">
+                添加
+              </el-button>
+            </h1>
+            <h1 v-if="user.privilege">
+              <el-button type="primary" @click="add = true">
+                添加
+              </el-button>
+            </h1>
+
+
           </el-space>
         </div>
       </div>
@@ -220,12 +231,23 @@ onMounted(() => {
         <el-collapse style="width: 80vh; display: flex;flex-direction: column;">
           <el-collapse-item v-for="train in trainsFiltered.data" :title="train.name">
             <div style="margin-bottom: 5%">
-              <el-button @click="change = true; toChange = train;">
-                更改
-              </el-button>
-              <el-button type="danger" @click="delTrain(train.id)">
-                删除
-              </el-button>
+              <h1 v-if="!user.privilege">
+                <el-button :disabled="true" @click="change = true; toChange = train;">
+                  更改
+                </el-button>
+                <el-button :disabled="true" type="danger" @click="delTrain(train.id)">
+                  删除
+                </el-button>
+              </h1>
+              <h1 v-if="user.privilege">
+                <el-button @click="change = true; toChange = train;">
+                  更改
+                </el-button>
+                <el-button type="danger" @click="delTrain(train.id)">
+                  删除
+                </el-button>
+              </h1>
+
             </div>
             <div>
               <TrainManageDetail v-bind="{ ...train, date: new Date(train.date) }" />

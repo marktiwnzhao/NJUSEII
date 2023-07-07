@@ -18,7 +18,7 @@ let form = reactive({
   type: '',
   idn: '',
   phone: '',
-  mileage_points: ''
+  mileage_points: '',
 });
 
 const setForm = async () => {
@@ -28,6 +28,7 @@ const setForm = async () => {
   form.idn = user.idn;
   form.phone = user.phone;
   form.mileage_points = user.mileage_points;
+
 }
 
 watch(user, () => {

@@ -6,9 +6,11 @@ import { useStationsStore } from "~/stores/stations";
 import { Right } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
 import { RouteInfo } from "~/utils/interfaces";
+import {useUserStore} from "~/stores/user";
 
 const router = useRouter()
 const stations = useStationsStore()
+const user = useUserStore()
 
 let routeName = ref('')
 let route_detail_form = ref()
@@ -175,9 +177,16 @@ onMounted(() => {
       <div style="display: flex; justify-content: center">
         <div style="display: flex; width: 80vh; justify-content: flex-end">
           <el-space>
-            <el-button type="primary" @click="add = true; toAdd = { name: '', station_ids: [] }">
-              添加
-            </el-button>
+            <h1 v-if="!user.privilege">
+              <el-button :disabled="true" type="primary" @click="add = true; toAdd = { name: '', station_ids: [] }">
+                添加
+              </el-button>
+            </h1>
+            <h1 v-if="user.privilege">
+              <el-button type="primary" @click="add = true; toAdd = { name: '', station_ids: [] }">
+                添加
+              </el-button>
+            </h1>
           </el-space>
         </div>
       </div>
@@ -189,12 +198,23 @@ onMounted(() => {
         <el-collapse style="width: 80vh; display: flex;flex-direction: column;">
           <el-collapse-item v-for="route in routesFiltered.data" :title="route.name">
             <div style="margin-bottom: 5%">
-              <el-button @click="change = true; toChange = route;">
-                更改
-              </el-button>
-              <el-button type="danger" @click="delRoute(route.id)">
-                删除
-              </el-button>
+              <h1 v-if="!user.privilege">
+                <el-button :disabled="true" @click="change = true; toChange = route;">
+                  更改
+                </el-button>
+                <el-button :disabled="true" type="danger" @click="delRoute(route.id)">
+                  删除
+                </el-button>
+              </h1>
+              <h1 v-if="user.privilege">
+                <el-button  @click="change = true; toChange = route;">
+                  更改
+                </el-button>
+                <el-button  type="danger" @click="delRoute(route.id)">
+                  删除
+                </el-button>
+              </h1>
+
             </div>
 
             <div style=" display: flex">

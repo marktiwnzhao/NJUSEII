@@ -6,6 +6,9 @@ import { ElNotification } from "element-plus";
 import { useStationsStore } from "~/stores/stations";
 import { useRouter } from "vue-router";
 import { StationInfo } from "~/utils/interfaces";
+import {useUserStore} from "~/stores/user";
+
+const user = useUserStore()
 
 let stations = useStationsStore()
 let router = useRouter()
@@ -153,9 +156,17 @@ watch(stations, () => {
         <div style="display: flex; width: 80vh; justify-content: flex-end">
           <el-space>
             <el-input v-model="toAdd" style="width: 20vh" />
-            <el-button type="primary" @click="addStation">
-              添加
-            </el-button>
+            <h1 v-if="!user.privilege">
+              <el-button :disabled="true" type="primary" @click="addStation">
+                添加
+              </el-button>
+            </h1>
+            <h1 v-if="user.privilege">
+              <el-button type="primary" @click="addStation">
+                添加
+              </el-button>
+            </h1>
+
           </el-space>
         </div>
       </div>
@@ -166,12 +177,23 @@ watch(stations, () => {
       <div style="display: flex; justify-content: center">
         <el-collapse style="width: 80vh; display: flex;flex-direction: column;">
           <el-collapse-item v-for="station in stationsFiltered.data" :title="station.name">
-            <el-button @click="rename = true; toRenameId = station.id">
-              更改
-            </el-button>
-            <el-button type="danger" @click="delStation(station.id)">
-              删除
-            </el-button>
+            <h1 v-if="!user.privilege">
+              <el-button :disabled="true" @click="rename = true; toRenameId = station.id">
+                更改
+              </el-button>
+              <el-button :disabled="true" type="danger" @click="delStation(station.id)">
+                删除
+              </el-button>
+            </h1>
+            <h1 v-if="user.privilege">
+              <el-button  @click="rename = true; toRenameId = station.id">
+                更改
+              </el-button>
+              <el-button  type="danger" @click="delStation(station.id)">
+                删除
+              </el-button>
+            </h1>
+
           </el-collapse-item>
 
         </el-collapse>

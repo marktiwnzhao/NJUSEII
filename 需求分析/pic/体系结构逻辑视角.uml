@@ -1,0 +1,10 @@
+@startuml
+skinparam componentStyle rectangle
+frame pkg {
+    [presentation] as pre
+    [businesslogic] as bus
+    [data]
+    pre ..> bus
+    bus ..> data
+}
+@enduml

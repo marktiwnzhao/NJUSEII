@@ -1,0 +1,47 @@
+@startuml
+skinparam componentStyle rectangle
+top to bottom direction
+frame pkg {
+    package presentation {
+        [homepage]
+        [logInPage]
+        [registerPage]
+        [userInfoPage]
+        [lineInfoPage]
+        [stationInfoPage]
+        [salePage]
+        [trainPage]
+    }
+    Package businesslogic {
+        [saleBl]
+        [userBl]
+        [lineBl]
+        [stationBl]
+        [trainBl]
+    }
+    Package data {
+        [userData]
+        [lineData]
+        [stationData]
+        [trainData]
+        [orderData]
+    }
+    logInPage ..> userBl
+    registerPage ..> userBl
+    userInfoPage ..> userBl
+    salePage ..> saleBl
+    lineInfoPage ..> lineBl
+    stationInfoPage ..> stationBl
+    trainPage ..> trainBl
+    saleBl ..> userBl
+    saleBl ..> trainBl
+    lineBl ..> trainBl
+    stationBl ..> trainBl
+    userBl ..> userData
+    saleBl ..> orderData
+    trainBl ..> trainData
+    stationBl ..> stationData
+    lineBl ..> lineData
+
+}
+@enduml

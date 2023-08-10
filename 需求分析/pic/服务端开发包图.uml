@@ -1,0 +1,38 @@
+@startuml
+skinparam componentStyle rectangle
+top to bottom direction
+frame pkg {
+    [axios]
+    Package dataService {
+        [userDataService]
+        [orderDataService]
+        [lineDataService]
+        [stationDataService]
+        [trainDataService]
+    }
+    axios <.. userDataService
+    axios <.. trainDataService
+    axios <.. orderDataService
+    axios <.. stationDataService
+    axios <.. lineDataService
+    Package data {
+        [userData]
+        [lineData]
+        [stationData]
+        [trainData]
+        [orderData]
+        database databaseutility
+    }
+    userDataService <.. userData
+    lineDataService <.. lineData
+    orderDataService <.. orderData
+    trainDataService <.. trainData
+    stationDataService <.. stationData
+    trainData ..> databaseutility
+    stationData ..> databaseutility
+    lineData ..> databaseutility
+    orderData ..> databaseutility
+    userData ..> databaseutility
+   
+}
+@enduml

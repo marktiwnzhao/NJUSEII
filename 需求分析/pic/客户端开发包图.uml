@@ -1,0 +1,63 @@
+@startuml
+skinparam componentStyle rectangle
+top to bottom direction
+frame pkg {
+    package presentation {
+        [homepage]
+        [logInPage]
+        [registerPage]
+        [userInfoPage]
+        [lineInfoPage]
+        [stationInfoPage]
+        [salePage]
+        [trainPage]
+    }
+    Package businesslogicService {
+        [userBlService]
+        [saleBlService]
+        [lineBlService]
+        [stationBlService]
+        [trainBlService]
+    }
+    Package businesslogic {
+        [saleBl]
+        [userBl]
+        [lineBl]
+        [stationBl]
+        [trainBl]
+    }
+    Package dataService {
+        [userDataService]
+        [orderDataService]
+        [lineDataService]
+        [stationDataService]
+        [trainDataService]
+    }
+    logInPage ..> userBlService
+    registerPage ..> userBlService
+    userInfoPage ..> userBlService
+    salePage ..> saleBlService
+    lineInfoPage ..> lineBlService
+    stationInfoPage ..> stationBlService
+    trainPage ..> trainBlService
+    userBlService ..> userBl
+    saleBlService ..> saleBl
+    lineBlService ..> lineBl
+    stationBlService ..> stationBl
+    trainBlService ..> trainBl
+    saleBl ..> userBl
+    saleBl ..> trainBl
+    lineBl ..> trainBl
+    stationBl ..> trainBl
+    userBl ..> userDataService
+    saleBl ..> orderDataService
+    trainBl ..> trainDataService
+    stationBl ..> stationDataService
+    lineBl ..> lineDataService
+    userDataService ..> [axios]
+    trainDataService ..> axios
+    orderDataService ..> axios
+    stationDataService ..> axios
+    lineDataService ..> axios
+}
+@enduml

@@ -1,0 +1,18 @@
+@startuml
+left to right direction
+frame pkg {
+    node CilentNode {
+        [client]
+    }
+    file client.jar
+    file server.jar
+    node ServerNode {
+        [Server]
+    }
+    CilentNode .. client.jar
+    ServerNode .. server.jar
+    CilentNode -- ServerNode:axios
+}
+
+
+@enduml

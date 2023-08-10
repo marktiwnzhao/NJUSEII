@@ -17,31 +17,44 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class StationServiceImpl implements StationService{
+public class StationServiceImpl implements StationService {
     private final StationDao stationDao;
+
+    // 根据站点ID获取站点信息
     @Override
-    public StationVO getStation(Long stationId){
+    public StationVO getStation(Long stationId) {
         return StationMapper.INSTANCE.toStationVO(stationDao.findById(stationId).get());
     }
+
+    // 获取所有站点列表
     @Override
-    public List<StationVO> listStations(){
-        return stationDao.findAll(Sort.by(Sort.Direction.ASC, "name")).stream().map(StationMapper.INSTANCE::toStationVO).collect(Collectors.toList());
+    public List<StationVO> listStations() {
+        return stationDao.findAll(Sort.by(Sort.Direction.ASC, "name"))
+                .stream()
+                .map(StationMapper.INSTANCE::toStationVO)
+                .collect(Collectors.toList());
     }
+
+    // 添加站点
     @Override
-    public void addStation(String name){
+    public void addStation(String name) {
         StationEntity entity = stationDao.findByName(name);
-        if(entity!=null){
+        if (entity != null) {
+            //防御式编程
             throw new BizException(BizError.STATIONNAME_EXISTS);
         }
         stationDao.save(StationEntity.builder().name(name).build());
     }
+
+    // 编辑站点
     @Override
-    public void editStation(Long id, String name){
+    public void editStation(Long id, String name) {
         StationEntity entity = stationDao.findById(id).get();
         entity.setName(name);
         stationDao.save(entity);
     }
 
+    // 删除站点
     @Override
     public void delStation(Long stationId) {
         stationDao.deleteById(stationId);

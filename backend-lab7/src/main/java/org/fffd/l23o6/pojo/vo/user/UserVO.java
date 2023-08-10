@@ -10,4 +10,5 @@ public class UserVO {
     private String idn;
     private String type;
     private String mileagePoints;
+    private Long privilege;
 }
